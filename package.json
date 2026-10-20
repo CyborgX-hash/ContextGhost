@@ -1,0 +1,31 @@
+{
+  "name": "contextghost-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ContextGhost — Open-Source AI Work Memory Assistant",
+  "workspaces": [
+    "apps/web",
+    "apps/api"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "prisma:generate": "npm run prisma:generate --workspace=apps/api",
+    "prisma:migrate": "npm run prisma:migrate --workspace=apps/api",
+    "prisma:seed": "npm run prisma:seed --workspace=apps/api"
+  },
+  "keywords": [
+    "contextghost",
+    "ai",
+    "developer-productivity",
+    "local-first",
+    "ollama",
+    "hacktoberfest"
+  ],
+  "author": "CyborgX-hash",
+  "license": "MIT"
+}
