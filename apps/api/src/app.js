@@ -2,6 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import { env } from './config/env.js';
 import healthRoutes from './routes/healthRoutes.js';
+import workspaceRoutes from './routes/workspaceRoutes.js';
+import sessionRoutes from './routes/sessionRoutes.js';
+import searchRoutes from './routes/searchRoutes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 export function createApp() {
@@ -21,6 +24,9 @@ export function createApp() {
 
   // API v1 routes
   app.use('/api/v1', healthRoutes);
+  app.use('/api/v1/workspaces', workspaceRoutes);
+  app.use('/api/v1/sessions', sessionRoutes);
+  app.use('/api/v1/search', searchRoutes);
 
   // 404 & Centralized Error Handlers
   app.use(notFoundHandler);

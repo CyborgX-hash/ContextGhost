@@ -72,55 +72,55 @@ Authoritative implementation tracker for ContextGhost (Hacktoberfest Week 3 them
 ---
 
 ## Phase 3 — Workspace & Git Context Engine
-- [ ] **TASK-301**: Implement Workspace service in `apps/api/src/services/workspaceService.js`:
+- [x] **TASK-301**: Implement Workspace service in `apps/api/src/services/workspaceService.js`:
   - Path existence validation, directory permission checks, path traversal prevention, safe boundaries.
   - *Criteria*: Blocks paths outside server-accessible allowed directories; rejects relative traversal.
-- [ ] **TASK-302**: Implement Git context collector in `apps/api/src/services/gitService.js`:
+- [x] **TASK-302**: Implement Git context collector in `apps/api/src/services/gitService.js`:
   - Current branch, commit hash/author/date, repository status (modified, staged, untracked).
   - Safe subprocess execution with array arguments (`child_process.execFile`), timeouts, and no shell concatenation.
   - *Criteria*: Collects Git status without modifying working tree; handles non-Git directories gracefully.
-- [ ] **TASK-303**: Implement Git diff summarizer and file excerpt extractor:
+- [x] **TASK-303**: Implement Git diff summarizer and file excerpt extractor:
   - Concise diff summaries, changed line counts, relevant snippet previews.
   - Respect `.gitignore`, exclude binary files, lockfiles, `.env`, dependency folders.
   - *Criteria*: Avoids huge diffs; truncates at configurable character limit.
-- [ ] **TASK-304**: Implement Secret Redactor in `apps/api/src/utils/redactor.js`:
+- [x] **TASK-304**: Implement Secret Redactor in `apps/api/src/utils/redactor.js`:
   - Detect and mask API keys, tokens, passwords, private keys, JWTs, connection strings in git diffs, notes, and imported logs.
   - *Criteria*: Verified against common secret patterns (AWS, GitHub, Generic API keys, DB URIs).
-- [ ] **TASK-305**: Implement Log & Test result parser:
+- [x] **TASK-305**: Implement Log & Test result parser:
   - File size limits (max 1MB), text validation, extraction of error traces and failing test names.
   - *Criteria*: Safely isolates error blocks as untrusted input.
 
 ---
 
 ## Phase 4 — Local AI Synthesis Engine (Ollama)
-- [ ] **TASK-401**: Implement Ollama AI client provider in `apps/api/src/ai/ollamaProvider.js`:
+- [x] **TASK-401**: Implement Ollama AI client provider in `apps/api/src/ai/ollamaProvider.js`:
   - Health check endpoint, model list retrieval, model readiness verification, timeout handling.
   - *Criteria*: Clear diagnostic messages when Ollama is offline or model is missing.
-- [ ] **TASK-402**: Build Prompt Synthesis engine in `apps/api/src/ai/promptBuilder.js`:
+- [x] **TASK-402**: Build Prompt Synthesis engine in `apps/api/src/ai/promptBuilder.js`:
   - Synthesize system instructions, developer workspace context, Git status, diff excerpts, test logs, and notes.
   - Enforce untrusted data boundaries (protect against prompt injection inside code/logs).
   - *Criteria*: Deterministic prompt requesting structured JSON output conforming to strict schema.
-- [ ] **TASK-403**: Implement Structured Output Validator & Parser in `apps/api/src/ai/outputValidator.js`:
+- [x] **TASK-403**: Implement Structured Output Validator & Parser in `apps/api/src/ai/outputValidator.js`:
   - Parse JSON response, validate schema (`sessionTitle`, `mainObjective`, `summary`, `accomplishments`, `modifiedFiles`, `unresolvedIssues`, `previousAttempts`, `nextActions`, `evidence`, `confidenceNotes`).
   - Fallback repair mechanism for slightly malformed JSON; safe fallback to raw snapshot if generation fails.
   - *Criteria*: Never crashes on unexpected model output; strictly validates fields.
-- [ ] **TASK-404**: Implement AI Session Analysis service orchestrator in `apps/api/src/services/aiService.js`:
+- [x] **TASK-404**: Implement AI Session Analysis service orchestrator in `apps/api/src/services/aiService.js`:
   - Integrates provider, prompt builder, validator, and bounded retry.
   - *Criteria*: End-to-end unit and integration testable with both live Ollama and mocked fallback.
 
 ---
 
 ## Phase 5 — Persistence, Session Capture & Resume Workflow
-- [ ] **TASK-501**: Implement Session Capture API endpoint (`POST /api/v1/sessions/capture`):
+- [x] **TASK-501**: Implement Session Capture API endpoint (`POST /api/v1/sessions/capture`):
   - Validates input, collects git context, redacts secrets, invokes AI analysis, saves relational records (Session, SessionFile, Issue, NextAction) inside Prisma transaction.
   - *Criteria*: Complete session saved in PostgreSQL with full audit trail and status.
-- [ ] **TASK-502**: Implement Session CRUD and retrieval endpoints:
+- [x] **TASK-502**: Implement Session CRUD and retrieval endpoints:
   - `GET /api/v1/sessions` (list with filters), `GET /api/v1/sessions/:id` (full details with relations), `PATCH /api/v1/sessions/:id/notes`, `DELETE /api/v1/sessions/:id`.
   - *Criteria*: Fully verified with database persistence.
-- [ ] **TASK-503**: Implement "Resume My Work" briefing endpoint (`GET /api/v1/workspaces/:id/resume`):
+- [x] **TASK-503**: Implement "Resume My Work" briefing endpoint (`GET /api/v1/workspaces/:id/resume`):
   - Fetches the most recent session for workspace, calculates elapsed time, identifies unresolved issues, prioritized next actions, and staleness warning.
   - *Criteria*: Returns instant actionable briefing for developer resumption.
-- [ ] **TASK-504**: Implement Database-backed Search Memory endpoint (`GET /api/v1/search`):
+- [x] **TASK-504**: Implement Database-backed Search Memory endpoint (`GET /api/v1/search`):
   - PostgreSQL full-text search across session titles, summaries, issues, next actions, and notes.
   - *Criteria*: Fast, multi-field search with ranked results.
 
