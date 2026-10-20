@@ -38,34 +38,34 @@ Authoritative implementation tracker for ContextGhost (Hacktoberfest Week 3 them
 ---
 
 ## Phase 2 — Frontend Foundation & Dashboard UI
-- [ ] **TASK-201**: Initialize `apps/web` with Vite, React, Tailwind CSS, Lucide icons, and React Router.
+- [x] **TASK-201**: Initialize `apps/web` with Vite, React, Tailwind CSS, Lucide icons, and React Router.
   - *Criteria*: Modern responsive frontend runs on port 5173 with dark mode theme tokens and typography.
-- [ ] **TASK-202**: Build App Shell layout: collapsible sidebar with logo, navigation links, workspace selector, and real-time backend/model status pills.
+- [x] **TASK-202**: Build App Shell layout: collapsible sidebar with logo, navigation links, workspace selector, and real-time backend/model status pills.
   - *Criteria*: Responsive sidebar, mobile toggle, active link indicators, persistent selected workspace.
-- [ ] **TASK-203**: Build Top Navigation with current project badge, quick capture CTA, search trigger, and model indicator.
+- [x] **TASK-203**: Build Top Navigation with current project badge, quick capture CTA, search trigger, and model indicator.
   - *Criteria*: Clean header with breadcrumb/active project context and quick actions.
-- [ ] **TASK-204**: Build Overview Dashboard page (`/`):
+- [x] **TASK-204**: Build Overview Dashboard page (`/`):
   - "Welcome back" banner with prominent "Resume My Work" CTA.
   - "Where You Left Off" card (latest AI briefing, primary task, modified files, timestamp).
   - "Unresolved Issues" card (errors, failed tests, attempts).
   - "Next Actions" card (top 3 prioritized suggestions with reasoning & file links).
   - "Recent Sessions" list with real data from backend.
   - *Criteria*: Dark charcoal aesthetics, accurate counts, no hardcoded fake statistics.
-- [ ] **TASK-205**: Build Workspaces Management view (`/workspaces`): list, register local directory, edit, delete, inspect.
+- [x] **TASK-205**: Build Workspaces Management view (`/workspaces`): list, register local directory, edit, delete, inspect.
   - *Criteria*: Full CRUD UI with path validation feedback.
-- [ ] **TASK-206**: Build Session Capture modal/view (`/capture`):
+- [x] **TASK-206**: Build Session Capture modal/view (`/capture`):
   - Workspace selector, Git status inspector, changed files preview, optional notes input, terminal/test log import, secret preview warning, and "Capture Session" action.
   - *Criteria*: Transparent preview of captured payload before AI processing.
-- [ ] **TASK-207**: Build Session Detail / Resume View (`/sessions/:id`):
+- [x] **TASK-207**: Build Session Detail / Resume View (`/sessions/:id`):
   - Header, AI briefing tabs (Executive Briefing, Changed Files, Issues & Failures, Next Actions, Raw Snapshot), add note, recapture, delete.
   - *Criteria*: Formatted evidence links, stale-age badges, copy-to-clipboard, export markdown.
-- [ ] **TASK-208**: Build Session History list page (`/sessions`):
+- [x] **TASK-208**: Build Session History list page (`/sessions`):
   - Filter by workspace, date range, search query, status badge.
   - *Criteria*: Paginated/searchable list of persistent sessions.
-- [ ] **TASK-209**: Build Search Memory page (`/search`):
+- [x] **TASK-209**: Build Search Memory page (`/search`):
   - Real-time search across sessions, notes, changed files, and action items with matching highlights.
   - *Criteria*: Accurate search results returned from database.
-- [ ] **TASK-210**: Build Settings page (`/settings`):
+- [x] **TASK-210**: Build Settings page (`/settings`):
   - Ollama base URL & model configuration, model ping test, PostgreSQL connection health, data retention & privacy controls.
   - *Criteria*: Tests live connections and updates preferences without exposing credentials.
 
@@ -127,13 +127,13 @@ Authoritative implementation tracker for ContextGhost (Hacktoberfest Week 3 them
 ---
 
 ## Phase 6 — Testing & Quality Assurance
-- [ ] **TASK-601**: Add backend unit and integration tests using Vitest & Supertest:
+- [x] **TASK-601**: Add backend unit and integration tests using Vitest & Supertest:
   - Secret redactor tests, Git service tests, path traversal tests, health check tests, session API tests.
   - *Criteria*: All automated test suites pass with high confidence.
-- [ ] **TASK-602**: Add frontend component and page tests:
+- [x] **TASK-602**: Add frontend component and page tests:
   - App shell, dashboard rendering, session detail tabs, capture flow empty/loading/error states.
   - *Criteria*: Frontend test suite executes cleanly.
-- [ ] **TASK-603**: Perform end-to-end integration verification:
+- [x] **TASK-603**: Perform end-to-end integration verification:
   - Full flow: workspace creation -> git inspection -> secret redaction -> session capture -> AI briefing -> resume -> search -> note update.
   - *Criteria*: Zero console errors, responsive UI, database state validated.
 
