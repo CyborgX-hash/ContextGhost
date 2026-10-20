@@ -9,14 +9,15 @@ export default {
     extend: {
       colors: {
         ghost: {
-          bg: '#090d16',
-          card: '#111726',
-          sidebar: '#0d121f',
-          surface: '#151d30',
+          bg: '#0b0f19',
+          card: '#121826',
+          sidebar: '#090d16',
+          surface: '#151c2e',
           border: 'rgba(255, 255, 255, 0.08)',
           'border-subtle': 'rgba(255, 255, 255, 0.05)',
-          accent: '#8b5cf6',
-          'accent-glow': 'rgba(139, 92, 246, 0.15)',
+          accent: '#2563eb', // electric blue
+          'accent-glow': 'rgba(37, 99, 235, 0.2)',
+          blue: '#3b82f6',
           cyan: '#38bdf8',
           emerald: '#10b981',
           rose: '#f43f5e',

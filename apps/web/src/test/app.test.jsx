@@ -7,7 +7,7 @@ describe('ContextGhost App Frontend', () => {
   beforeEach(() => {
     // Mock global fetch for API calls
     global.fetch = vi.fn((url) => {
-      if (url.includes('/api/v1/workspaces') && !url.includes('/resume')) {
+      if (url.includes('/api/v1/workspaces')) {
         return Promise.resolve({
           ok: true,
           json: () =>
@@ -16,9 +16,9 @@ describe('ContextGhost App Frontend', () => {
               data: [
                 {
                   id: 'ws-123',
-                  name: 'ContextGhost Core',
+                  name: 'project_dashboard',
                   rootPath: '/Users/test/Context-Ghost',
-                  _count: { sessions: 1 },
+                  _count: { sessions: 2 },
                   sessions: []
                 }
               ]
@@ -41,36 +41,30 @@ describe('ContextGhost App Frontend', () => {
         });
       }
 
-      if (url.includes('/resume')) {
-        return Promise.resolve({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              success: true,
-              data: {
-                hasSession: true,
-                session: {
-                  id: 'sess-123',
-                  title: 'Demo Work Session',
-                  summary: 'Working on architecture setup',
-                  capturedAt: new Date().toISOString(),
-                  files: [],
-                  issues: [],
-                  nextActions: []
-                },
-                staleness: { notice: 'Recently captured', level: 'fresh' }
-              }
-            })
-        });
-      }
-
       if (url.includes('/api/v1/sessions')) {
         return Promise.resolve({
           ok: true,
           json: () =>
             Promise.resolve({
               success: true,
-              data: { total: 1, sessions: [] }
+              data: {
+                total: 1,
+                sessions: [
+                  {
+                    id: 'sess-1',
+                    workspaceId: 'ws-123',
+                    title: 'Scheduled Tasks - Dashboard-Seite + RemoteTrigger',
+                    summary: 'Das Project Dashboard soll eine neue Seite Scheduled Tasks bekommen.',
+                    capturedAt: new Date().toISOString(),
+                    captureStatus: 'SUCCESS',
+                    analysis: {
+                      displayStatus: 'Aktiv',
+                      tag: 'feature'
+                    },
+                    workspace: { name: 'project_dashboard' }
+                  }
+                ]
+              }
             })
         });
       }
@@ -82,23 +76,26 @@ describe('ContextGhost App Frontend', () => {
     });
   });
 
-  it('renders application brand and navigation links', async () => {
+  it('renders dashboard brand and sidebar sections', async () => {
     render(<App />);
 
-    expect(screen.getByText('ContextGhost')).toBeInTheDocument();
-    expect(screen.getByText('Work Memory Assistant')).toBeInTheDocument();
-    expect(screen.getByText('Overview')).toBeInTheDocument();
-    expect(screen.getByText('Workspaces')).toBeInTheDocument();
-    expect(screen.getByText('Session History')).toBeInTheDocument();
+    expect(screen.getAllByText('Dashboard').length).toBeGreaterThan(0);
+    expect(screen.getByText('WORKSPACE')).toBeInTheDocument();
+    expect(screen.getByText('DEVOPS')).toBeInTheDocument();
+    expect(screen.getAllByText('Projekte').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Plans').length).toBeGreaterThan(0);
+    expect(screen.getByText('Importieren')).toBeInTheDocument();
   });
 
-  it('loads active workspace and displays welcome header', async () => {
+  it('renders top KPI metric cards and session card in grid', async () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Welcome back to/i)).toBeInTheDocument();
-      const workspaceElements = screen.getAllByText('ContextGhost Core');
-      expect(workspaceElements.length).toBeGreaterThan(0);
+      expect(screen.getByText('UMSETZUNG')).toBeInTheDocument();
+      expect(screen.getByText('PIPELINE')).toBeInTheDocument();
+      expect(screen.getByText('AKTIVITAET')).toBeInTheDocument();
+      expect(screen.getByText('ABDECKUNG')).toBeInTheDocument();
+      expect(screen.getByText(/Scheduled Tasks - Dashboard-Seite/i)).toBeInTheDocument();
     });
   });
 });
