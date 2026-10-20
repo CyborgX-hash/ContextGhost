@@ -24,15 +24,15 @@ Authoritative implementation tracker for ContextGhost (Hacktoberfest Week 3 them
 ---
 
 ## Phase 1 — Foundation & Backend Setup
-- [ ] **TASK-101**: Initialize `apps/api` Express application with ES modules, error middleware, cors, and environment validation.
+- [x] **TASK-101**: Initialize `apps/api` Express application with ES modules, error middleware, cors, and environment validation.
   - *Criteria*: Server starts on configured PORT (5001), validates environment, handles 404/500 cleanly with JSON.
-- [ ] **TASK-102**: Set up Prisma ORM with PostgreSQL database schema in `apps/api/prisma/schema.prisma`.
+- [x] **TASK-102**: Set up Prisma ORM with PostgreSQL database schema in `apps/api/prisma/schema.prisma`.
   - *Criteria*: Normalized models (`Workspace`, `Session`, `SessionFile`, `Issue`, `NextAction`, `SessionNote`) with relations, indexes, timestamps.
-- [ ] **TASK-103**: Create and run initial Prisma migration `init` against local PostgreSQL `contextghost` database.
+- [x] **TASK-103**: Create and run initial Prisma migration `init` against local PostgreSQL `contextghost` database.
   - *Criteria*: Migration applied cleanly, tables verified in PostgreSQL.
-- [ ] **TASK-104**: Implement database seed script in `apps/api/prisma/seed.js` with realistic demo workspaces and sessions.
+- [x] **TASK-104**: Implement database seed script in `apps/api/prisma/seed.js` with realistic demo workspaces and sessions.
   - *Criteria*: `npm run seed` executes without errors and inserts verifiable sample records.
-- [ ] **TASK-105**: Implement REST API health, readiness, and system status endpoints under `/api/v1/health` and `/api/v1/system/status`.
+- [x] **TASK-105**: Implement REST API health, readiness, and system status endpoints under `/api/v1/health` and `/api/v1/system/status`.
   - *Criteria*: Returns 200 OK with database connection status, Ollama reachability, timestamp, and version.
 
 ---

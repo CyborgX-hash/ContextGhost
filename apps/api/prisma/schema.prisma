@@ -1,0 +1,108 @@
+// Prisma schema for ContextGhost
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Workspace {
+  id          String    @id @default(uuid())
+  name        String
+  rootPath    String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  sessions    Session[]
+
+  @@index([rootPath])
+  @@index([createdAt])
+}
+
+model Session {
+  id              String        @id @default(uuid())
+  workspaceId     String
+  workspace       Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  title           String
+  mainObjective   String?
+  summary         String?
+  capturedAt      DateTime      @default(now())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  captureStatus   String        @default("SUCCESS") // SUCCESS, RAW_SNAPSHOT, PARTIAL, FAILED
+  modelName       String?
+  rawSnapshot     Json?         // Captured git status, diff snippet, logs, notes
+  analysis        Json?         // Structured parsed AI output
+  confidenceNotes String?
+
+  files           SessionFile[]
+  issues          Issue[]
+  nextActions     NextAction[]
+  notes           SessionNote[]
+
+  @@index([workspaceId])
+  @@index([capturedAt])
+  @@index([createdAt])
+}
+
+model SessionFile {
+  id              String   @id @default(uuid())
+  sessionId       String
+  session         Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  path            String
+  changeType      String   // modified, untracked, staged, deleted
+  evidenceSummary String?
+  lineReferences  String?
+  createdAt       DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([path])
+}
+
+model Issue {
+  id               String   @id @default(uuid())
+  sessionId        String
+  session          Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  title            String
+  description      String?
+  category         String   @default("error") // error, test_failure, build_failure, unresolved_todo
+  severity         String   @default("medium") // critical, high, medium, low
+  status           String   @default("unresolved") // unresolved, attempted, resolved
+  evidence         String?
+  previousAttempts String?
+  createdAt        DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([status])
+  @@index([category])
+}
+
+model NextAction {
+  id          String   @id @default(uuid())
+  sessionId   String
+  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  priority    Int      @default(1) // 1 = highest, 2 = medium, 3 = low
+  status      String   @default("pending") // pending, completed
+  evidence    String?
+  filePath    String?
+  createdAt   DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([priority])
+}
+
+model SessionNote {
+  id        String   @id @default(uuid())
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sessionId])
+}
