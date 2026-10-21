@@ -16,6 +16,16 @@ async function request(endpoint, options = {}) {
 
   try {
     const res = await fetch(url, { ...options, headers });
+    const contentType =
+      (res.headers && typeof res.headers.get === 'function' ? res.headers.get('content-type') : null) || '';
+
+    // If response explicitly declares text/html (e.g. Vercel SPA index.html fallback), report configuration error
+    if (contentType && contentType.includes('text/html')) {
+      throw new Error(
+        `Backend unreachable: ${url} returned HTML instead of JSON. Ensure VITE_API_BASE_URL is set on Vercel to your live Render backend URL.`
+      );
+    }
+
     const json = await res.json();
 
     if (!res.ok) {
