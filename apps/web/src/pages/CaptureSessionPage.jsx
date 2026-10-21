@@ -191,19 +191,23 @@ export default function CaptureSessionPage() {
 
       {/* Workspace Selection Banner */}
       <div className="p-4 rounded-xl bg-ghost-card border border-ghost-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400">Target Workspace:</span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-slate-400 shrink-0">Target Workspace:</span>
           <select
             value={activeWorkspace?.id || ''}
             onChange={(e) => {
               const ws = workspaces.find((w) => w.id === e.target.value);
               if (ws) selectWorkspace(ws);
             }}
-            className="px-3 py-1.5 rounded-lg bg-ghost-surface border border-ghost-border text-xs text-slate-200 font-medium focus:outline-none focus:border-violet-500"
+            disabled={!workspaces.length}
+            className="min-w-[260px] max-w-[480px] px-3 py-2 rounded-lg bg-ghost-surface border border-ghost-border text-sm text-slate-200 font-medium focus:outline-none focus:border-violet-500 disabled:opacity-50 disabled:cursor-not-allowed appearance-auto"
           >
+            {workspaces.length === 0 && (
+              <option value="" disabled>Loading workspaces…</option>
+            )}
             {workspaces.map((w) => (
               <option key={w.id} value={w.id}>
-                {w.name} ({w.rootPath})
+                {w.name} — {w.rootPath}
               </option>
             ))}
           </select>
