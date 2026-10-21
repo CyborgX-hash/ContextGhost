@@ -8,7 +8,7 @@ export class WorkspaceService {
    */
   static validatePath(targetPath) {
     if (!targetPath || typeof targetPath !== 'string') {
-      throw new Error('Workspace path must be a non-empty string');
+      throw new Error('Workspace path or repository URL must be a non-empty string');
     }
 
     // Reject null byte injection or strange control characters
@@ -16,8 +16,24 @@ export class WorkspaceService {
       throw new Error('Invalid path format: contains null bytes');
     }
 
-    // Resolve and normalize absolute path
-    const resolvedPath = path.resolve(targetPath);
+    const trimmed = targetPath.trim();
+
+    // Check if it is a Repository URL (HTTP, HTTPS, SSH git)
+    const isRepoUrl =
+      /^https?:\/\/[^\s$.?#].[^\s]*$/i.test(trimmed) ||
+      /^git@[a-zA-Z0-9.-]+:[a-zA-Z0-9._\/-]+\.git$/i.test(trimmed);
+
+    if (isRepoUrl) {
+      return trimmed;
+    }
+
+    // Check if it's an organizational slug (e.g. "org/repo" or "my-project")
+    if (/^[a-zA-Z0-9_.-]+(\/[a-zA-Z0-9_.-]+)*$/.test(trimmed) && !trimmed.startsWith('/') && !trimmed.includes('\\')) {
+      return trimmed;
+    }
+
+    // Resolve and normalize absolute path for filesystem targets
+    const resolvedPath = path.resolve(trimmed);
 
     // Prevent access to root or dangerous system roots
     const dangerousRoots = ['/', 'C:\\', '/etc', '/var', '/bin', '/sbin', '/usr/bin', '/usr/sbin'];
@@ -25,11 +41,11 @@ export class WorkspaceService {
       throw new Error(`Direct system root path is not permitted as a workspace: ${resolvedPath}`);
     }
 
-    // Check directory existence
+    // Check directory existence for filesystem paths
     let stats;
     try {
       stats = fs.statSync(resolvedPath);
-    } catch (err) {
+    } catch {
       throw new Error(`Workspace path does not exist: ${resolvedPath}`);
     }
 
@@ -37,10 +53,9 @@ export class WorkspaceService {
       throw new Error(`Specified path is not a directory: ${resolvedPath}`);
     }
 
-    // Verify read permission
     try {
       fs.accessSync(resolvedPath, fs.constants.R_OK);
-    } catch (err) {
+    } catch {
       throw new Error(`Permission denied: cannot read directory at ${resolvedPath}`);
     }
 

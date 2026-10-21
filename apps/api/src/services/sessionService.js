@@ -4,16 +4,34 @@ import { GitService } from './gitService.js';
 import { LogService } from './logService.js';
 import { AIService } from './aiService.js';
 import { redactSecrets } from '../utils/redactor.js';
+import { validateAndProcessContextFiles } from '../utils/contextUploadValidator.js';
 
 export class SessionService {
   /**
    * Preview context before capture so user sees what will be submitted
    */
-  static async previewContext({ workspaceId, rawNotes, rawLogs }) {
+  static async previewContext({
+    workspaceId,
+    rawNotes,
+    rawLogs,
+    gitDiff,
+    branch,
+    commitMessage,
+    contextFiles
+  }) {
     const workspace = await WorkspaceService.getWorkspaceById(workspaceId);
-    const gitContext = await GitService.getGitContext(workspace.rootPath);
+
+    // If client provided a pasted/uploaded git diff, parse it directly; otherwise inspect local workspace
+    let gitContext = null;
+    if (gitDiff && typeof gitDiff === 'string' && gitDiff.trim()) {
+      gitContext = GitService.parsePastedDiff(gitDiff, branch, commitMessage);
+    } else {
+      gitContext = await GitService.getGitContext(workspace.rootPath);
+    }
+
     const processedLog = LogService.processLog(rawLogs);
     const sanitizedNotes = redactSecrets(rawNotes || '');
+    const sanitizedFiles = validateAndProcessContextFiles(contextFiles);
 
     return {
       workspace: {
@@ -25,19 +43,53 @@ export class SessionService {
       notes: sanitizedNotes,
       logs: processedLog.sanitized,
       extractedErrors: processedLog.extractedErrors,
-      readyToCapture: true
+      contextFiles: sanitizedFiles.map((f) => ({
+        name: f.name,
+        sizeBytes: f.sizeBytes,
+        extension: f.extension
+      })),
+      readyToCapture: true,
+      disclosure: 'Approved context will be sent to the configured hosted open-weight AI model.'
     };
   }
 
   /**
    * Full session capture: collect context, run AI analysis, save in Prisma transaction
    */
-  static async captureSession({ workspaceId, notes, logs, previousAttempts, forceRawSnapshot = false }) {
+  static async captureSession({
+    workspaceId,
+    notes,
+    logs,
+    previousAttempts,
+    gitDiff,
+    branch,
+    commitMessage,
+    contextFiles,
+    forceRawSnapshot = false
+  }) {
     const workspace = await WorkspaceService.getWorkspaceById(workspaceId);
-    const gitContext = await GitService.getGitContext(workspace.rootPath);
+
+    // If client provided a pasted/uploaded git diff, parse it directly; otherwise inspect local workspace
+    let gitContext = null;
+    if (gitDiff && typeof gitDiff === 'string' && gitDiff.trim()) {
+      gitContext = GitService.parsePastedDiff(gitDiff, branch, commitMessage);
+    } else {
+      gitContext = await GitService.getGitContext(workspace.rootPath);
+    }
+
     const processedLog = LogService.processLog(logs);
     const sanitizedNotes = redactSecrets(notes || '');
     const sanitizedAttempts = redactSecrets(previousAttempts || '');
+    const sanitizedFiles = validateAndProcessContextFiles(contextFiles);
+
+    // Build context payload string for uploaded files to feed into AI analysis
+    let augmentedLogs = processedLog.sanitized || '';
+    if (sanitizedFiles.length > 0) {
+      const filesText = sanitizedFiles
+        .map((f) => `--- File Context: ${f.name} ---\n${f.content}`)
+        .join('\n\n');
+      augmentedLogs = augmentedLogs ? `${augmentedLogs}\n\n${filesText}` : filesText;
+    }
 
     // Raw snapshot bundle to save
     const rawSnapshot = {
@@ -51,8 +103,9 @@ export class SessionService {
         diffSummary: gitContext.diffSummary,
         diffSnippet: gitContext.diffSnippet
       },
+      contextFiles: sanitizedFiles.map((f) => ({ name: f.name, sizeBytes: f.sizeBytes })),
       notes: sanitizedNotes,
-      logsSnippet: processedLog.sanitized ? processedLog.sanitized.substring(0, 5000) : null,
+      logsSnippet: augmentedLogs ? augmentedLogs.substring(0, 5000) : null,
       previousAttempts: sanitizedAttempts
     };
 
@@ -66,7 +119,7 @@ export class SessionService {
           workspaceName: workspace.name,
           gitContext,
           notes: sanitizedNotes,
-          logs: processedLog.sanitized,
+          logs: augmentedLogs,
           previousAttempts: sanitizedAttempts
         })
       };
@@ -75,7 +128,7 @@ export class SessionService {
         workspaceName: workspace.name,
         gitContext,
         notes: sanitizedNotes,
-        logs: processedLog.sanitized,
+        logs: augmentedLogs,
         previousAttempts: sanitizedAttempts
       });
     }

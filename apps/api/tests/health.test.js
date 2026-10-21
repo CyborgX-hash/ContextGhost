@@ -19,6 +19,22 @@ describe('API Health Endpoints', () => {
     expect(res.body.data.database.connected).toBe(true);
   });
 
+  it('GET /api/v1/ai/status returns provider readiness without exposing secrets', async () => {
+    const res = await request(app).get('/api/v1/ai/status');
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toHaveProperty('provider');
+    expect(res.body.data).toHaveProperty('configured');
+    expect(res.body.data).toHaveProperty('configuredModel');
+    expect(res.body.data).toHaveProperty('connected');
+
+    // Security check: Must never leak API keys or authorization headers
+    const jsonStr = JSON.stringify(res.body);
+    expect(jsonStr).not.toContain('Bearer');
+    expect(jsonStr).not.toContain('apiKey');
+    expect(jsonStr).not.toContain('sk-');
+  });
+
   it('GET /unknown-route returns 404 with structured error', async () => {
     const res = await request(app).get('/api/v1/nonexistent');
     expect(res.status).toBe(404);

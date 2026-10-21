@@ -224,7 +224,7 @@ export default function AppLayout() {
                 <div className="flex items-center justify-between px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 cursor-pointer transition-colors">
                   <div className="flex items-center gap-2.5">
                     <Cpu className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Portainer / Ollama</span>
+                    <span>AI ({systemStatus?.aiEngine?.provider?.toUpperCase() || 'HOSTED'})</span>
                   </div>
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
@@ -236,7 +236,7 @@ export default function AppLayout() {
                 <div className="flex items-center justify-between px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 cursor-pointer transition-colors">
                   <div className="flex items-center gap-2.5">
                     <Database className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Gitea / Postgres</span>
+                    <span>Postgres DB</span>
                   </div>
                   <span className={`w-1.5 h-1.5 rounded-full ${isDbConnected ? 'bg-emerald-400' : 'bg-rose-400'}`} />
                 </div>

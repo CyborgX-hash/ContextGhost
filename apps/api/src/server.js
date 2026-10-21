@@ -1,7 +1,7 @@
 import { app } from './app.js';
 import { env } from './config/env.js';
 import { checkDatabaseConnection } from './db/prisma.js';
-import { ollamaProvider } from './ai/ollamaProvider.js';
+import { getActiveAiProvider } from './ai/providerFactory.js';
 
 async function startServer() {
   console.log('👻 Initializing ContextGhost API server...');
@@ -14,17 +14,13 @@ async function startServer() {
     console.warn(`⚠️ PostgreSQL connection warning: ${dbHealth.error}`);
   }
 
-  // Ollama check
-  const aiHealth = await ollamaProvider.checkHealth();
+  // Active AI Provider check
+  const aiProvider = getActiveAiProvider();
+  const aiHealth = await aiProvider.checkHealth();
   if (aiHealth.connected) {
-    console.log(`✅ Local Ollama engine reachable at ${aiHealth.baseUrl}`);
-    if (aiHealth.modelAvailable) {
-      console.log(`✅ Configured model ready: ${aiHealth.configuredModel}`);
-    } else {
-      console.warn(`⚠️ Model "${aiHealth.configuredModel}" not found in Ollama library. Available models: ${aiHealth.availableModels.join(', ') || 'none'}`);
-    }
+    console.log(`✅ AI Provider (${aiHealth.provider}) ready. Model: ${aiHealth.configuredModel}`);
   } else {
-    console.warn(`⚠️ Ollama offline or unreachable at ${aiHealth.baseUrl}. Run "ollama serve" to enable local AI.`);
+    console.warn(`⚠️ AI Provider (${aiHealth.provider}) warning: ${aiHealth.error}`);
   }
 
   app.listen(env.port, () => {

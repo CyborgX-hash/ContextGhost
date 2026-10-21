@@ -168,7 +168,7 @@ export default function WorkspacesPage() {
             <div className="flex items-center justify-between border-b border-ghost-border pb-3">
               <div className="flex items-center gap-2">
                 <FolderOpen className="w-5 h-5 text-violet-400" />
-                <h3 className="text-base font-bold text-white">Register Local Workspace</h3>
+                <h3 className="text-base font-bold text-white">Register Workspace</h3>
               </div>
               <button
                 onClick={() => setShowModal(false)}
@@ -179,7 +179,7 @@ export default function WorkspacesPage() {
             </div>
 
             <p className="text-xs text-slate-400">
-              Provide an absolute local path accessible to the ContextGhost backend process on this machine.
+              Provide a Git repository URL (e.g. <code className="text-violet-300">https://github.com/org/repo</code>), project slug, or local directory path.
             </p>
 
             {formError && (
@@ -192,11 +192,11 @@ export default function WorkspacesPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-slate-300 block mb-1">
-                  Absolute Directory Root Path *
+                  Repository URL or Path *
                 </label>
                 <input
                   type="text"
-                  placeholder="/Users/username/projects/my-app"
+                  placeholder="https://github.com/org/repo or /path/to/project"
                   value={formData.rootPath}
                   onChange={(e) => setFormData({ ...formData, rootPath: e.target.value })}
                   className="w-full px-3 py-2 text-xs font-mono bg-ghost-surface border border-ghost-border rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"

@@ -147,3 +147,46 @@ Authoritative implementation tracker for ContextGhost (Hacktoberfest Week 3 them
   - In-depth design documentation, security boundaries, and data flow.
 - [x] **TASK-703**: Final clean Git verification, license verification, and release commit.
   - *Criteria*: Clean git tree, pushed to GitHub repository, passing tests.
+
+---
+
+## Phase 8 — Hosted Open-Weight AI & Cloud Deployment (Render + Vercel)
+- [x] **TASK-801**: Implement Hosted Open-Weight AI Provider (`OpenRouterProvider`) in `apps/api/src/ai/openrouterProvider.js`:
+  - OpenAI-compatible chat completions endpoint (`https://openrouter.ai/api/v1/chat/completions`).
+  - Read configuration from validated environment variables (`OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `OPENROUTER_BASE_URL`, `AI_TIMEOUT_MS`, `AI_MAX_RETRIES`).
+  - Bounded retries, AbortController timeouts, safe error handling (401 auth, 402 credits, 429 rate limit, 5xx outages, invalid model).
+  - Add `GET /api/v1/ai/status` endpoint to report provider readiness without exposing secrets.
+  - *Criteria*: 8 comprehensive unit tests passing with high confidence.
+- [x] **TASK-802**: Integrate Provider Factory & Multi-Provider Abstraction:
+  - Supports `openrouter` (default hosted), `groq`, and `ollama` (local).
+  - Clean separation: never hardcodes model IDs, never exposes keys or raw headers, validates responses server-side.
+  - *Criteria*: Verified seamless provider switching via `AI_PROVIDER` without code modifications.
+- [x] **TASK-803**: Cloud Workspace & Flexible Context Collection:
+  - Support registering workspaces by repository URL (e.g. `https://github.com/org/repo`) or project name without requiring server-local directory paths.
+  - Accept pasted Git diffs, commit messages, and uploaded context files (`.txt`, `.md`, `.diff`, `.patch`, `.log`).
+  - Enforce security boundaries: max 1MB file size, reject binary/executable files, disallow `.env` and credential files.
+  - *Criteria*: 7 automated unit tests verify context validation, upload limits, and unified diff parsing.
+- [x] **TASK-804**: Context Preview, Secret Redaction Feedback & Hosted AI Disclosure:
+  - Frontend preview displays sanitized diff, notes, logs, and attached context files.
+  - Explicit disclosure informing user that approved context will be sent to the configured hosted open-weight model.
+  - User confirmation required before transmission.
+  - *Criteria*: Transparent preview and explicit consent prior to external network call.
+- [x] **TASK-805**: Raw Snapshot Fallback & Draft Preservation:
+  - When provider is unconfigured, offline, or returns error, allow saving unanalyzed `RAW_SNAPSHOT`.
+  - Preserve user inputs and draft state upon transient failures.
+  - *Criteria*: Zero data loss when AI is unavailable or offline.
+- [x] **TASK-806**: Frontend Settings & Diagnostics:
+  - Display configured provider, model name, connection status, and setup instructions.
+  - Accurate data privacy and hosted AI governance guidance without false offline claims.
+  - *Criteria*: Zero API keys exposed, accurate diagnostics across OpenRouter, Groq, and Ollama.
+- [x] **TASK-807**: Comprehensive Automated QA Suite:
+  - 45 backend unit/integration tests passing (OpenRouter, Groq, health, git, redactor, context upload, session API).
+  - Frontend component and dashboard tests passing.
+  - *Criteria*: Monorepo test suite green (47 total passing tests).
+- [x] **TASK-808**: Documentation & Deployment Configuration:
+  - Updated root `.env.example`, `apps/api/.env.example`, and `apps/web/.env.example`.
+  - Documented Render (backend + Postgres) and Vercel (frontend) deployment steps in `README.md`.
+  - Documented open-weight models, licenses (Llama 3.3, Qwen 2.5), and privacy boundaries.
+  - *Criteria*: Complete, verifiable deployment documentation.
+
+

@@ -1,6 +1,6 @@
 import express from 'express';
 import { checkDatabaseConnection } from '../db/prisma.js';
-import { ollamaProvider } from '../ai/ollamaProvider.js';
+import { getActiveAiProvider } from '../ai/providerFactory.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 
 const router = express.Router();
@@ -18,7 +18,8 @@ router.get('/health', async (req, res) => {
 router.get('/system/status', async (req, res) => {
   try {
     const dbStatus = await checkDatabaseConnection();
-    const aiStatus = await ollamaProvider.checkHealth();
+    const activeProvider = getActiveAiProvider();
+    const aiStatus = await activeProvider.checkHealth();
 
     const overallHealthy = dbStatus.connected;
 

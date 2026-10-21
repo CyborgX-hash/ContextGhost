@@ -3,12 +3,12 @@
 
 [![Hacktoberfest 2026](https://img.shields.io/badge/Hacktoberfest-2026%20Week%203-blueviolet?style=for-the-badge)](https://hacktoberfest.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
-[![Local First](https://img.shields.io/badge/AI-Local--First%20(Ollama)-blue?style=for-the-badge)](https://ollama.ai)
+[![Hosted Open-Weight AI](https://img.shields.io/badge/AI-Open--Weight%20(OpenRouter)-blue?style=for-the-badge)](https://openrouter.ai/)
 [![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL%20%2B%20Prisma-336791?style=for-the-badge)](https://www.prisma.io/)
 
-ContextGhost is a **local-first, privacy-preserving AI work memory assistant** for software engineers. It captures your active Git state, modified files, terminal errors, test results, and notes, uses an open-weight model running locally on your hardware via Ollama to synthesize a grounded session summary, persists relational records in PostgreSQL, and generates actionable "Resume My Work" briefings whenever you return to your codebase.
+ContextGhost is a **developer work-memory assistant** that helps software engineers resume interrupted work without reconstructing their entire mental context. It captures your active Git state, modified files, terminal errors, test results, and notes, uses a **hosted open-weight AI model** (via OpenRouter or Groq) or a local Ollama instance to synthesize a grounded session summary, persists relational records in **PostgreSQL**, and generates actionable **"Resume My Work"** briefings whenever you return to your codebase.
 
-Built for **Hacktoberfest 2026 Week 3 ("Slow and Steady")**, ContextGhost demonstrates that open-weight local AI can eliminate mental fatigue and repetitive context-switching without sending your proprietary code to third-party cloud APIs.
+Built for **Hacktoberfest 2026 Week 3 ("Slow and Steady")**, ContextGhost demonstrates that open-weight AI models can eliminate mental fatigue and repetitive context-switching without requiring heavy local server installations or proprietary closed APIs.
 
 ---
 
@@ -25,8 +25,9 @@ Writing manual markdown worklogs is tedious and rarely maintained. Chatbots requ
 
 **ContextGhost solves this deterministically**:
 1. Click **Capture Session** before stepping away.
-2. ContextGhost securely inspects Git status, masks credentials, parses error logs, and synthesizes structured work memory via local Ollama.
-3. Return hours or days later and click **Resume My Work** for an instant briefing with prioritized next steps and evidence references.
+2. ContextGhost securely inspects Git status, accepts pasted diffs or uploaded context files, masks credentials, parses error logs, and displays a sanitized preview.
+3. Review and confirm the transmission disclosure to synthesize structured work memory via the configured hosted open-weight model.
+4. Return hours or days later and click **Resume My Work** for an instant briefing with prioritized next steps and evidence references.
 
 ---
 
@@ -34,22 +35,22 @@ Writing manual markdown worklogs is tedious and rarely maintained. Chatbots requ
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│              ContextGhost React Frontend               │
+│           ContextGhost React Frontend (Vercel)         │
 │          (Vite + Tailwind CSS + Lucide Icons)          │
-│               http://localhost:5173                    │
+│                 https://app.vercel.app                 │
 └───────────────────────────┬────────────────────────────┘
                             │ REST API (/api/v1)
 ┌───────────────────────────▼────────────────────────────┐
-│              ContextGhost Express API                  │
+│            ContextGhost Express API (Render)           │
 │       Safe Git Inspector & Secret Redaction Engine     │
-│               http://localhost:5001                    │
+│             https://contextghost-api.onrender.com      │
 └──────────────┬──────────────────────────┬──────────────┘
                │                          │
                ▼                          ▼
  ┌──────────────────────────┐  ┌────────────────────────┐
- │   Prisma ORM + Postgres  │  │  Local Ollama Engine   │
- │   Relational Memory &    │  │  (Open-weight Models   │
- │   Full-Text Search       │  │   e.g., qwen2.5:1.5b)  │
+ │   Prisma ORM + Postgres  │  │ Hosted Open-Weight AI  │
+ │   Relational Memory &    │  │ (OpenRouter / Groq /   │
+ │   Full-Text Search       │  │  Optional Local Ollama)│
  └──────────────────────────┘  └────────────────────────┘
 ```
 
@@ -57,17 +58,35 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full design, security bound
 
 ---
 
+## 🤖 Hosted Open-Weight AI Models & Licenses
+
+ContextGhost is committed to **open-weight architectures**. Rather than locking into closed proprietary models, ContextGhost connects to open-weight models hosted on **[OpenRouter](https://openrouter.ai/)**:
+
+| Model Identifier | Architecture / Family | Published License | Recommended Use |
+| :--- | :--- | :--- | :--- |
+| `meta-llama/llama-3.3-70b-instruct` | Meta Llama 3.3 | Llama 3.3 Community License | Complex debugging, multi-file diff synthesis |
+| `qwen/qwen-2.5-72b-instruct` | Alibaba Qwen 2.5 | Apache 2.0 | Ultra-fast structured JSON generation |
+| `mistralai/mistral-small-24b-instruct-2501` | Mistral NeMo | Apache 2.0 | Balanced speed, precision, and low latency |
+
+### Privacy & Hosted Data Handling
+- **Multi-Layer Secret Redaction:** AWS keys, GitHub tokens, database connection URLs, JWTs, and private keys are scrubbed on the server before transmitting anything to OpenRouter.
+- **Explicit User Consent:** Context is only sent to the external provider when you explicitly click **Confirm & Capture**.
+- **Untrusted Input Isolation:** Imported code, diffs, and logs are wrapped inside XML evidence tags to neutralize prompt injection attempts.
+- **Offline Fallback:** If the AI provider is unconfigured or unavailable, ContextGhost saves an unanalyzed **`RAW_SNAPSHOT`** directly in PostgreSQL so no work is ever lost.
+
+---
+
 ## ✨ Core Features
 
 | Feature | Description |
 | :--- | :--- |
-| **Grounded AI Synthesis** | Uses local open-weight models (`qwen2.5`) to extract accomplishments, unresolved errors, and actionable next steps without hallucinating. |
+| **Grounded AI Synthesis** | Synthesizes accomplishments, unresolved errors, and actionable next steps without hallucinating. |
 | **Instant "Resume My Work"** | One-click briefing highlighting where you left off, elapsed time, staleness level, and top 3 next steps. |
-| **Safe Git Inspector** | Safe subprocess execution with array arguments (`execFile`), 5s timeouts, and zero shell concatenation. |
+| **Flexible Context Capture** | Inspects local Git repos or accepts pasted diffs (`git diff`) and uploaded context files (`.diff`, `.patch`, `.log`, `.txt`, `.md`). |
 | **Multi-Layer Secret Redactor** | Masks AWS keys, GitHub tokens, database connection URLs, JWTs, and private keys before AI processing. |
 | **Normalized PostgreSQL Storage** | Structured relational tables (`Workspace`, `Session`, `SessionFile`, `Issue`, `NextAction`, `SessionNote`) via Prisma ORM. |
 | **Searchable Memory** | Fast PostgreSQL-backed search across session titles, summaries, modified filenames, and error traces. |
-| **Offline Resilience** | If Ollama is offline or a model is missing, ContextGhost saves a deterministic `RAW_SNAPSHOT` so no work is lost. |
+| **Multi-Provider Architecture** | Supports **OpenRouter** (hosted open-weight), **Groq** (fast cloud), and **Ollama** (offline local). |
 | **Dark Developer Aesthetic** | Custom dark charcoal theme, responsive sidebar, status pills for DB/AI, and clear typography. |
 
 ---
@@ -75,41 +94,40 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full design, security bound
 ## 🚀 Getting Started
 
 ### 1. Prerequisites
-- **Node.js**: v18+ (tested on Node v22)
-- **PostgreSQL**: v14+ running locally on port `5432`
-- **Ollama**: running locally on `http://localhost:11434`
+- **Node.js**: v18+ (tested on Node v20/v22)
+- **PostgreSQL**: v14+ (Local instance or cloud provider like Prisma Postgres, Supabase, Neon)
+- **OpenRouter API Key** (or Groq, or local Ollama)
 
-### 2. Install Ollama Model
-```bash
-ollama serve
-ollama pull qwen2.5:1.5b
-```
-
-### 3. Clone & Install Dependencies
+### 2. Clone & Install Dependencies
 ```bash
 git clone https://github.com/CyborgX-hash/ContextGhost.git
 cd ContextGhost
 npm install
 ```
 
-### 4. Configure Environment
+### 3. Configure Environment Variables
 ```bash
 cp .env.example .env
 ```
-Ensure your `DATABASE_URL` in `.env` points to your local PostgreSQL instance:
+Edit `.env` to configure your database and AI provider:
 ```dotenv
-DATABASE_URL="postgresql://username:password@localhost:5432/contextghost?schema=public"
-OLLAMA_BASE_URL="http://localhost:11434"
-OLLAMA_MODEL="qwen2.5:1.5b"
+# Database Connection
+DATABASE_URL="postgresql://user:password@localhost:5432/contextghost?schema=public"
+
+# AI Provider: 'openrouter' (default hosted), 'groq', or 'ollama'
+AI_PROVIDER=openrouter
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 ```
 
-### 5. Run Database Migrations & Seed
+### 4. Run Database Schema Sync & Seed
 ```bash
 npm run prisma:migrate
 npm run prisma:seed
 ```
 
-### 6. Start Development Servers
+### 5. Start Development Servers
 ```bash
 # Starts both Express API (port 5001) and Vite Frontend (port 5173)
 npm run dev
@@ -118,14 +136,44 @@ Open **[http://localhost:5173](http://localhost:5173)** in your browser!
 
 ---
 
-## 🧪 Testing
+## ☁️ Deployment Guide
 
-Run automated tests across the monorepo:
+### Deploying Backend to Render
+1. Create a **Web Service** on [Render](https://dashboard.render.com/) and connect your GitHub repository `ContextGhost`.
+2. Configure:
+   - **Root Directory:** `apps/api`
+   - **Build Command:** `npm install && npx prisma migrate deploy`
+   - **Start Command:** `node src/server.js`
+3. Set the following **Environment Variables** in Render:
+   - `DATABASE_URL`: *(Your PostgreSQL connection string)*
+   - `NODE_ENV`: `production`
+   - `PORT`: `10000`
+   - `FRONTEND_URL`: `https://your-contextghost-frontend.vercel.app`
+   - `AI_PROVIDER`: `openrouter`
+   - `OPENROUTER_API_KEY`: *(Your OpenRouter API key)*
+   - `OPENROUTER_MODEL`: `meta-llama/llama-3.3-70b-instruct`
+   - `OPENROUTER_BASE_URL`: `https://openrouter.ai/api/v1`
+
+### Deploying Frontend to Vercel
+1. Create a **New Project** on [Vercel](https://vercel.com/) and import your `ContextGhost` repository.
+2. Configure:
+   - **Root Directory:** `apps/web`
+   - **Framework Preset:** `Vite`
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+3. Add the **Environment Variable**:
+   - `VITE_API_BASE_URL`: `https://your-contextghost-api.onrender.com/api/v1`
+
+---
+
+## 🧪 Automated Testing
+
+ContextGhost includes comprehensive unit, integration, and UI test suites:
 ```bash
 # Run all tests (API + Frontend)
 npm test
 
-# Run backend unit & integration tests
+# Run backend test suite (45 tests covering OpenRouter, redactor, git, workspaces, sessions)
 npm run test --workspace=apps/api
 
 # Run frontend UI tests
@@ -134,12 +182,12 @@ npm run test --workspace=apps/web
 
 ---
 
-## 🛡️ Security & Privacy Guarantees
+## 🛡️ Security & Privacy Architecture
 
-- **No Hosted AI Dependency**: Zero telemetry, zero external AI API keys needed.
-- **Path Traversal Protection**: Rejects null bytes, relative traversal, and direct system roots.
-- **Secret Redaction**: Diffs, terminal logs, and notes are sanitized with regular expressions prior to prompt creation.
-- **Untrusted Input Isolation**: Imported code and logs are strictly enclosed in `<developer_evidence>` blocks to neutralize prompt injection attempts.
+- **Zero Secret Leakage:** Backend API keys and credentials are never sent to the browser or stored in session records.
+- **Subprocess Safety:** Local Git commands run via `child_process.execFile` with array arguments and 5s timeouts (zero shell injection risk).
+- **Upload Restrictions:** File uploads are restricted to text-based context files (`.diff`, `.patch`, `.log`, `.txt`, `.md`) under 1MB. Credentials like `.env` and `id_rsa` are rejected outright.
+- **Prompt Injection Defense:** Untrusted code and logs are strictly wrapped in XML boundary tags and analyzed as evidence rather than executable instructions.
 
 ---
 
@@ -155,7 +203,7 @@ npm run test --workspace=apps/web
 Hacktoberfest 2026 Week 3 celebrates deliberate, high-quality development that creates sustainable value. ContextGhost embodies this ethos:
 - Grounded, evidence-backed summaries over flashy hallucinatory chat.
 - Relational PostgreSQL storage instead of volatile local state.
-- Privacy-first open-weight AI over vendor lock-in.
+- Hosted open-weight AI over closed proprietary lock-in.
 
 ---
 

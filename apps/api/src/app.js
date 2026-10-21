@@ -5,6 +5,7 @@ import healthRoutes from './routes/healthRoutes.js';
 import workspaceRoutes from './routes/workspaceRoutes.js';
 import sessionRoutes from './routes/sessionRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 export function createApp() {
@@ -27,6 +28,7 @@ export function createApp() {
   app.use('/api/v1/workspaces', workspaceRoutes);
   app.use('/api/v1/sessions', sessionRoutes);
   app.use('/api/v1/search', searchRoutes);
+  app.use('/api/v1/ai', aiRoutes);
 
   // 404 & Centralized Error Handlers
   app.use(notFoundHandler);

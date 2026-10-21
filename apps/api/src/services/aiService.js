@@ -1,4 +1,4 @@
-import { ollamaProvider } from '../ai/ollamaProvider.js';
+import { getActiveAiProvider } from '../ai/providerFactory.js';
 import { buildAnalysisPrompt } from '../ai/promptBuilder.js';
 import { validateAndNormalizeOutput } from '../ai/outputValidator.js';
 
@@ -7,15 +7,17 @@ export class AIService {
    * Synthesize developer workspace session into structured memory
    */
   static async analyzeSessionContext({ workspaceName, gitContext, notes, logs, previousAttempts }) {
-    // 1. Check Ollama health
-    const health = await ollamaProvider.checkHealth();
+    const aiProvider = getActiveAiProvider();
+
+    // 1. Check AI provider health
+    const health = await aiProvider.checkHealth();
 
     if (!health.connected) {
       return {
         success: false,
         captureStatus: 'RAW_SNAPSHOT',
         modelName: null,
-        error: `Ollama is offline (${health.error || 'Connection refused'}). Raw snapshot saved.`,
+        error: `AI provider (${health.provider || 'AI'}) is offline (${health.error || 'Connection refused'}). Raw snapshot saved.`,
         analysis: this.generateRawFallback({ workspaceName, gitContext, notes, logs, previousAttempts })
       };
     }
@@ -25,7 +27,7 @@ export class AIService {
         success: false,
         captureStatus: 'RAW_SNAPSHOT',
         modelName: health.configuredModel,
-        error: `Configured model "${health.configuredModel}" not found in Ollama. Run "ollama pull ${health.configuredModel}".`,
+        error: `Configured model "${health.configuredModel}" not available for ${health.provider || 'AI'}.`,
         analysis: this.generateRawFallback({ workspaceName, gitContext, notes, logs, previousAttempts })
       };
     }
@@ -43,7 +45,7 @@ export class AIService {
     let lastError = null;
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
-        const result = await ollamaProvider.generate({
+        const result = await aiProvider.generate({
           prompt,
           system,
           format: 'json',

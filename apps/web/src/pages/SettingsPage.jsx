@@ -66,7 +66,7 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* 1. Local AI Engine (Ollama) */}
+      {/* 1. AI Engine (OpenRouter, Groq, or Local Ollama) */}
       <div className="rounded-xl bg-ghost-card border border-ghost-border p-6 space-y-4">
         <div className="flex items-center justify-between border-b border-ghost-border pb-3">
           <div className="flex items-center gap-2.5">
@@ -74,8 +74,20 @@ export default function SettingsPage() {
               <Cpu className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-white">Local Ollama AI Inference</h3>
-              <p className="text-[11px] text-slate-400">Open-weight model running entirely on local hardware</p>
+              <h3 className="text-sm font-semibold text-white">
+                {aiStatus?.provider === 'openrouter'
+                  ? 'OpenRouter Hosted Open-Weight AI'
+                  : aiStatus?.provider === 'groq'
+                  ? 'Groq Cloud AI Inference'
+                  : 'Local Ollama AI Inference'}
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                {aiStatus?.provider === 'openrouter'
+                  ? 'Hosted open-weight inference provider (Render & Vercel deployment)'
+                  : aiStatus?.provider === 'groq'
+                  ? 'Ultra-fast cloud inference for open-weight models'
+                  : 'Open-weight model running entirely on local hardware'}
+              </p>
             </div>
           </div>
 
@@ -89,31 +101,43 @@ export default function SettingsPage() {
             }`}
           >
             {aiStatus?.connected && aiStatus?.modelAvailable
-              ? 'Model Ready'
+              ? aiStatus?.provider === 'openrouter'
+                ? 'OpenRouter Ready'
+                : aiStatus?.provider === 'groq'
+                ? 'Groq Active'
+                : 'Model Ready'
               : aiStatus?.connected
               ? 'Model Missing'
-              : 'Offline'}
+              : 'Unconfigured / Offline'}
           </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
           <div className="p-3 rounded-lg bg-ghost-surface border border-ghost-border space-y-1">
-            <span className="text-slate-500 block text-[10px] uppercase font-semibold">Ollama Base URL</span>
-            <span className="font-mono text-slate-200">{aiStatus?.baseUrl || 'http://localhost:11434'}</span>
+            <span className="text-slate-500 block text-[10px] uppercase font-semibold">Active AI Provider</span>
+            <span className="font-mono text-slate-200">
+              {aiStatus?.provider === 'openrouter'
+                ? 'OpenRouter (openrouter.ai/api/v1)'
+                : aiStatus?.provider === 'groq'
+                ? 'Groq Cloud API (api.groq.com)'
+                : (aiStatus?.baseUrl || 'http://localhost:11434')}
+            </span>
           </div>
           <div className="p-3 rounded-lg bg-ghost-surface border border-ghost-border space-y-1">
             <span className="text-slate-500 block text-[10px] uppercase font-semibold">Configured Model</span>
-            <span className="font-mono text-violet-300 font-bold">{aiStatus?.configuredModel || 'qwen2.5:1.5b'}</span>
+            <span className="font-mono text-violet-300 font-bold">
+              {aiStatus?.configuredModel || 'Not configured'}
+            </span>
           </div>
         </div>
 
         {aiStatus?.availableModels && aiStatus.availableModels.length > 0 && (
           <div>
             <span className="text-[11px] font-semibold text-slate-400 block mb-1">
-              Locally Installed Models ({aiStatus.availableModels.length}):
+              Available Models ({aiStatus.availableModels.length}):
             </span>
             <div className="flex flex-wrap gap-2">
-              {aiStatus.availableModels.map((model) => (
+              {aiStatus.availableModels.slice(0, 10).map((model) => (
                 <span
                   key={model}
                   className="px-2 py-0.5 rounded bg-ghost-surface border border-ghost-border text-[11px] font-mono text-slate-300"
@@ -121,19 +145,39 @@ export default function SettingsPage() {
                   {model}
                 </span>
               ))}
+              {aiStatus.availableModels.length > 10 && (
+                <span className="text-[11px] text-slate-500 self-center">
+                  +{aiStatus.availableModels.length - 10} more in catalog
+                </span>
+              )}
             </div>
           </div>
         )}
 
         {(!aiStatus?.connected || !aiStatus?.modelAvailable) && (
           <div className="p-3.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 space-y-2">
-            <p className="font-medium">Ollama Setup Required:</p>
-            <div className="bg-black/40 p-2.5 rounded font-mono text-[11px] space-y-1 text-slate-200">
-              <div># Start Ollama service</div>
-              <div className="text-violet-400">ollama serve</div>
-              <div className="pt-1"># Pull configured model</div>
-              <div className="text-violet-400">ollama pull {aiStatus?.configuredModel || 'qwen2.5:1.5b'}</div>
-            </div>
+            <p className="font-medium">AI Provider Setup Instructions:</p>
+            {aiStatus?.provider === 'openrouter' ? (
+              <div className="space-y-1 text-[11px] text-slate-300">
+                <p>Configure the following backend environment variables (e.g. in your Render Dashboard):</p>
+                <div className="bg-black/40 p-2.5 rounded font-mono text-slate-200 space-y-0.5">
+                  <div><span className="text-slate-500">AI_PROVIDER=</span><span className="text-violet-400">openrouter</span></div>
+                  <div><span className="text-slate-500">OPENROUTER_API_KEY=</span><span className="text-amber-400">sk-or-v1-your-key</span></div>
+                  <div><span className="text-slate-500">OPENROUTER_MODEL=</span><span className="text-violet-400">meta-llama/llama-3.3-70b-instruct</span></div>
+                </div>
+              </div>
+            ) : aiStatus?.provider === 'groq' ? (
+              <p className="text-[11px] text-slate-300">
+                Please set a valid <code className="text-violet-400 font-mono">GROQ_API_KEY</code> and <code className="text-violet-400 font-mono">GROQ_MODEL</code> in your backend environment variables.
+              </p>
+            ) : (
+              <div className="bg-black/40 p-2.5 rounded font-mono text-[11px] space-y-1 text-slate-200">
+                <div># Start Ollama service</div>
+                <div className="text-violet-400">ollama serve</div>
+                <div className="pt-1"># Pull configured model</div>
+                <div className="text-violet-400">ollama pull {aiStatus?.configuredModel || 'qwen2.5:1.5b'}</div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -168,15 +212,15 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* 3. Privacy & Redaction Policy */}
+      {/* 3. Privacy & Data Governance Policy */}
       <div className="rounded-xl bg-ghost-card border border-ghost-border p-6 space-y-4">
         <div className="flex items-center gap-2.5 border-b border-ghost-border pb-3">
           <div className="w-8 h-8 rounded-lg bg-emerald-600/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
             <ShieldCheck className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">Privacy & Local-First Guarantees</h3>
-            <p className="text-[11px] text-slate-400">Zero cloud dependencies for your source code and logs</p>
+            <h3 className="text-sm font-semibold text-white">Privacy & Data Governance Guarantees</h3>
+            <p className="text-[11px] text-slate-400">Multi-layer redaction and explicit user consent</p>
           </div>
         </div>
 
@@ -184,20 +228,40 @@ export default function SettingsPage() {
           <div className="p-3 rounded-lg bg-ghost-surface border border-ghost-border space-y-1">
             <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Secret Redaction</span>
+              <span>Multi-Layer Secret Redaction</span>
             </span>
             <p className="text-slate-400 text-[11px]">
-              AWS credentials, GitHub tokens, database passwords, and private keys are masked before processing.
+              AWS credentials, GitHub tokens, database passwords, JWTs, and private keys are scrubbed prior to AI synthesis.
             </p>
           </div>
 
           <div className="p-3 rounded-lg bg-ghost-surface border border-ghost-border space-y-1">
             <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>No Telemetry</span>
+              <span>Explicit Transmission Approval</span>
             </span>
             <p className="text-slate-400 text-[11px]">
-              ContextGhost never uploads developer code, session notes, or diffs to external hosted APIs.
+              Sanitized context is only transmitted to the configured hosted open-weight model when you explicitly confirm.
+            </p>
+          </div>
+
+          <div className="p-3 rounded-lg bg-ghost-surface border border-ghost-border space-y-1">
+            <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Zero Credential Leakage</span>
+            </span>
+            <p className="text-slate-400 text-[11px]">
+              API keys and backend credentials are never exposed in browser bundles, API responses, or stored in sessions.
+            </p>
+          </div>
+
+          <div className="p-3 rounded-lg bg-ghost-surface border border-ghost-border space-y-1">
+            <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Offline Fallback (Raw Snapshot)</span>
+            </span>
+            <p className="text-slate-400 text-[11px]">
+              When AI is unconfigured or offline, raw snapshots persist your diffs and notes locally in PostgreSQL.
             </p>
           </div>
         </div>

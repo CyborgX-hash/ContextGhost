@@ -26,12 +26,20 @@ export class SessionController {
 
   static async preview(req, res, next) {
     try {
-      const { workspaceId, notes, logs } = req.body;
+      const { workspaceId, notes, logs, gitDiff, branch, commitMessage, contextFiles } = req.body;
       if (!workspaceId) {
         return errorResponse(res, 'workspaceId is required for preview', 400);
       }
 
-      const preview = await SessionService.previewContext({ workspaceId, rawNotes: notes, rawLogs: logs });
+      const preview = await SessionService.previewContext({
+        workspaceId,
+        rawNotes: notes,
+        rawLogs: logs,
+        gitDiff,
+        branch,
+        commitMessage,
+        contextFiles
+      });
       return successResponse(res, preview, 'Capture preview generated');
     } catch (err) {
       return errorResponse(res, err.message, 400);
@@ -40,7 +48,18 @@ export class SessionController {
 
   static async capture(req, res, next) {
     try {
-      const { workspaceId, notes, logs, previousAttempts, forceRawSnapshot } = req.body;
+      const {
+        workspaceId,
+        notes,
+        logs,
+        previousAttempts,
+        gitDiff,
+        branch,
+        commitMessage,
+        contextFiles,
+        forceRawSnapshot
+      } = req.body;
+
       if (!workspaceId) {
         return errorResponse(res, 'workspaceId is required to capture session', 400);
       }
@@ -50,6 +69,10 @@ export class SessionController {
         notes,
         logs,
         previousAttempts,
+        gitDiff,
+        branch,
+        commitMessage,
+        contextFiles,
         forceRawSnapshot: Boolean(forceRawSnapshot)
       });
 

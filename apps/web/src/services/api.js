@@ -3,10 +3,12 @@
  * Wraps REST calls to Express backend (/api/v1)
  */
 
-const BASE_URL = '/api/v1';
+const RAW_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) || '/api/v1';
+const BASE_URL = RAW_BASE.replace(/\/$/, '');
 
 async function request(endpoint, options = {}) {
-  const url = `${BASE_URL}${endpoint}`;
+  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = `${BASE_URL}${normalizedEndpoint}`;
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {})
@@ -31,6 +33,7 @@ export const api = {
   // System & Health
   getHealth: () => request('/health'),
   getSystemStatus: () => request('/system/status'),
+  getAiStatus: () => request('/ai/status'),
 
   // Workspaces
   listWorkspaces: () => request('/workspaces'),

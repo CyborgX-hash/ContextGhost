@@ -164,4 +164,58 @@ export class GitService {
       diffSnippet
     };
   }
+
+  /**
+   * Parse user-provided git diff or patch text (e.g. pasted into web UI or uploaded as a diff file)
+   */
+  static parsePastedDiff(diffText, branch = 'main', commitMessage = null) {
+    if (!diffText || typeof diffText !== 'string' || !diffText.trim()) {
+      return null;
+    }
+
+    const maxChars = env.maxContextChars || 30000;
+    let sanitizedDiff = env.secretRedaction ? redactSecrets(diffText) : diffText;
+    if (sanitizedDiff.length > maxChars) {
+      sanitizedDiff = sanitizedDiff.substring(0, maxChars) + '\n\n[...Diff truncated for size limit...]';
+    }
+
+    const lines = sanitizedDiff.split('\n');
+    const filesMap = new Map();
+    let insertions = 0;
+    let deletions = 0;
+
+    for (const line of lines) {
+      if (line.startsWith('diff --git a/') || line.startsWith('diff --git ')) {
+        const parts = line.split(' ');
+        const pathB = parts[parts.length - 1]?.replace(/^b\//, '').trim();
+        if (pathB && !filesMap.has(pathB)) {
+          filesMap.set(pathB, { path: pathB, changeType: 'modified' });
+        }
+      } else if (line.startsWith('+++ b/')) {
+        const filePath = line.substring(6).trim();
+        if (filePath && !filesMap.has(filePath)) {
+          filesMap.set(filePath, { path: filePath, changeType: 'modified' });
+        }
+      } else if (line.startsWith('+') && !line.startsWith('+++')) {
+        insertions++;
+      } else if (line.startsWith('-') && !line.startsWith('---')) {
+        deletions++;
+      }
+    }
+
+    const files = Array.from(filesMap.values());
+    const fileCount = files.length > 0 ? files.length : 1;
+
+    return {
+      isGitRepo: true,
+      branch: branch || 'main',
+      status: 'pasted_context',
+      files: files.length > 0 ? files : [{ path: 'pasted_changes.diff', changeType: 'modified' }],
+      changedFilesCount: fileCount,
+      commit: commitMessage ? { subject: commitMessage } : null,
+      diffSummary: `${fileCount} file(s) identified (+${insertions} / -${deletions})`,
+      diffSnippet: sanitizedDiff
+    };
+  }
 }
+
