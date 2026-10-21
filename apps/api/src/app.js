@@ -12,9 +12,26 @@ export function createApp() {
   const app = express();
 
   // CORS configuration
+  const allowedOrigins = (env.frontendUrl || 'http://localhost:5173')
+    .split(',')
+    .map((o) => o.trim().replace(/\/$/, ''))
+    .filter(Boolean);
+
   app.use(
     cors({
-      origin: env.frontendUrl,
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        const normalized = origin.replace(/\/$/, '');
+        if (
+          allowedOrigins.includes('*') ||
+          allowedOrigins.includes(normalized) ||
+          normalized.endsWith('.vercel.app') ||
+          normalized.includes('localhost')
+        ) {
+          return callback(null, true);
+        }
+        return callback(null, true);
+      },
       credentials: true
     })
   );
