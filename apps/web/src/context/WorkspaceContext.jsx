@@ -14,18 +14,22 @@ export function WorkspaceProvider({ children }) {
     try {
       setLoading(true);
       const data = await api.listWorkspaces();
-      setWorkspaces(data);
+      if (Array.isArray(data) && data.length > 0) {
+        setWorkspaces(data);
 
-      // Restore saved active workspace or pick first available
-      const savedId = localStorage.getItem('contextghost_active_ws');
-      const found = data.find((w) => w.id === savedId) || data[0] || null;
-      setActiveWorkspace(found);
-      if (found) {
-        localStorage.setItem('contextghost_active_ws', found.id);
+        // Restore saved active workspace or pick first available
+        const savedId = localStorage.getItem('contextghost_active_ws');
+        const found = data.find((w) => w.id === savedId) || data[0] || null;
+        setActiveWorkspace(found);
+        if (found) {
+          localStorage.setItem('contextghost_active_ws', found.id);
+        }
+        setError(null);
+      } else {
+        setWorkspaces([]);
       }
-      setError(null);
     } catch (err) {
-      console.error('Failed to load workspaces:', err);
+      console.warn('Failed to load workspaces:', err.message);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -36,22 +40,32 @@ export function WorkspaceProvider({ children }) {
     try {
       const status = await api.getSystemStatus();
       setSystemStatus(status);
+      setError(null);
+      // Auto-recover workspaces if they haven't loaded yet
+      setWorkspaces((current) => {
+        if (!current || current.length === 0) {
+          refreshWorkspaces();
+        }
+        return current;
+      });
     } catch (err) {
-      console.warn('System status check failed:', err);
+      console.warn('System status check failed:', err.message);
       setSystemStatus({
         status: 'offline',
         database: { connected: false },
         aiEngine: { connected: false }
       });
     }
-  }, []);
+  }, [refreshWorkspaces]);
 
   useEffect(() => {
     refreshWorkspaces();
     refreshSystemStatus();
 
-    // Periodic status poll every 20 seconds
-    const interval = setInterval(refreshSystemStatus, 20000);
+    // Auto-poll health & workspaces every 5 seconds until connected, then every 15s
+    const interval = setInterval(() => {
+      refreshSystemStatus();
+    }, 10000);
     return () => clearInterval(interval);
   }, [refreshWorkspaces, refreshSystemStatus]);
 

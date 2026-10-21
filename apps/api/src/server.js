@@ -23,7 +23,7 @@ async function startServer() {
     console.warn(`⚠️ AI Provider (${aiHealth.provider}) warning: ${aiHealth.error}`);
   }
 
-  app.listen(env.port, () => {
+  app.listen(env.port, '0.0.0.0', () => {
     console.log(`🚀 ContextGhost API running at http://localhost:${env.port}`);
     console.log(`   Health check: http://localhost:${env.port}/api/v1/health`);
     console.log(`   System status: http://localhost:${env.port}/api/v1/system/status`);

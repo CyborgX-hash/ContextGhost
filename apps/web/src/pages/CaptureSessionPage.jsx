@@ -24,7 +24,7 @@ import { api } from '../services/api';
 const ALLOWED_EXTS = ['.diff', '.patch', '.log', '.txt', '.md', '.json', '.yml', '.yaml'];
 
 export default function CaptureSessionPage() {
-  const { workspaces, activeWorkspace, selectWorkspace, systemStatus } = useWorkspace();
+  const { workspaces, activeWorkspace, selectWorkspace, systemStatus, refreshWorkspaces, refreshSystemStatus } = useWorkspace();
   const [gitInspection, setGitInspection] = useState(null);
   const [inspecting, setInspecting] = useState(false);
   const [notes, setNotes] = useState('');
@@ -213,14 +213,31 @@ export default function CaptureSessionPage() {
           </select>
         </div>
 
-        <button
-          onClick={() => activeWorkspace && inspectWorkspace(activeWorkspace.id)}
-          disabled={inspecting}
-          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-violet-300 self-start sm:self-auto"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${inspecting ? 'animate-spin' : ''}`} />
-          <span>Refresh Git Status</span>
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          {workspaces.length === 0 && (
+            <button
+              onClick={() => {
+                refreshWorkspaces();
+                refreshSystemStatus();
+              }}
+              className="px-2.5 py-1 rounded bg-violet-600/30 hover:bg-violet-600/50 text-violet-300 text-xs border border-violet-500/40 transition-colors font-medium"
+            >
+              Retry
+            </button>
+          )}
+          <button
+            onClick={() => {
+              refreshWorkspaces();
+              refreshSystemStatus();
+              if (activeWorkspace) inspectWorkspace(activeWorkspace.id);
+            }}
+            disabled={inspecting}
+            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-violet-300"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${inspecting ? 'animate-spin' : ''}`} />
+            <span>Refresh Git Status</span>
+          </button>
+        </div>
       </div>
 
       {error && (
