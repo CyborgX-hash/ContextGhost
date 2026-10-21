@@ -5,15 +5,12 @@ import {
   BarChart2,
   Folder,
   MessageSquare,
-  TrendingUp,
   Clock,
-  PlusCircle,
-  Box,
+  Sparkles,
   GitFork,
-  Timer,
+  Terminal,
   FileText,
   Layers,
-  Newspaper,
   Cpu,
   Database,
   Sliders,
@@ -21,10 +18,9 @@ import {
   X,
   Search,
   Bell,
-  Download,
   RotateCw,
-  Sparkles,
-  ChevronDown
+  PlusCircle,
+  Activity
 } from 'lucide-react';
 import { useWorkspace } from '../context/WorkspaceContext';
 
@@ -79,7 +75,7 @@ export default function AppLayout() {
               <div className="w-7 h-7 rounded-lg bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
                 <LayoutGrid className="w-4 h-4" />
               </div>
-              <span className="text-base font-bold tracking-tight text-white">Dashboard</span>
+              <span className="text-base font-bold tracking-tight text-white">ContextGhost</span>
             </NavLink>
             <button
               onClick={() => setMobileMenuOpen(false)}
@@ -91,10 +87,10 @@ export default function AppLayout() {
 
           {/* Navigation Sections */}
           <div className="py-2 space-y-4">
-            {/* WORKSPACE Section */}
+            {/* WORK MEMORY Section */}
             <div>
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-4 py-1.5">
-                WORKSPACE
+                WORK MEMORY
               </div>
               <div className="space-y-0.5 px-2">
                 <NavLink
@@ -122,7 +118,21 @@ export default function AppLayout() {
                   }
                 >
                   <Folder className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Projekte</span>
+                  <span>Workspaces</span>
+                </NavLink>
+
+                <NavLink
+                  to="/capture"
+                  className={({ isActive }) =>
+                    `flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                      isActive
+                        ? 'text-white bg-slate-800/60'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+                    }`
+                  }
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Capture Session</span>
                 </NavLink>
 
                 <NavLink
@@ -135,90 +145,62 @@ export default function AppLayout() {
                     }`
                   }
                 >
-                  <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Claude Sessions</span>
+                  <Clock className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Session History</span>
+                </NavLink>
+
+                <NavLink
+                  to="/search"
+                  className={({ isActive }) =>
+                    `flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                      isActive
+                        ? 'text-white bg-slate-800/60'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+                    }`
+                  }
+                >
+                  <Search className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Search Memory</span>
+                </NavLink>
+              </div>
+            </div>
+
+            {/* DEVELOPER CONTEXT Section */}
+            <div>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-4 py-1.5">
+                DEVELOPER CONTEXT
+              </div>
+              <div className="space-y-0.5 px-2">
+                <NavLink
+                  to="/"
+                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-600/15 text-blue-400 border-l-2 border-blue-500 shadow-sm transition-all"
+                >
+                  <FileText className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Active Plans</span>
                 </NavLink>
 
                 <NavLink
                   to="/sessions"
                   className="flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 transition-colors"
                 >
-                  <TrendingUp className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Session-Analyse</span>
-                </NavLink>
-
-                <NavLink
-                  to="/settings"
-                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 transition-colors"
-                >
-                  <Clock className="w-3.5 h-3.5 text-slate-400" />
-                  <span>AI Timesheets</span>
-                </NavLink>
-
-                <NavLink
-                  to="/workspaces"
-                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 transition-colors"
-                >
-                  <PlusCircle className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Neues Projekt</span>
-                </NavLink>
-              </div>
-            </div>
-
-            {/* DEVOPS Section */}
-            <div>
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-4 py-1.5">
-                DEVOPS
-              </div>
-              <div className="space-y-0.5 px-2">
-                <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 cursor-pointer transition-colors">
-                  <Box className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Container</span>
-                </div>
-
-                <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 cursor-pointer transition-colors">
                   <GitFork className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Abhängigkeiten</span>
-                </div>
+                  <span>Git Diffs & Patches</span>
+                </NavLink>
 
-                <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 cursor-pointer transition-colors">
-                  <Timer className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Scheduled Tasks</span>
-                </div>
-
-                {/* Plans (Active selection matching screenshot) */}
                 <NavLink
-                  to="/"
-                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-600/15 text-blue-400 border-l-2 border-blue-500 shadow-sm transition-all"
+                  to="/sessions"
+                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 transition-colors"
                 >
-                  <FileText className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Plans</span>
+                  <Terminal className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Terminal Logs</span>
                 </NavLink>
               </div>
             </div>
 
-            {/* CONTENT Section */}
+            {/* SYSTEM HEALTH Section */}
             <div>
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-4 py-1.5">
-                CONTENT
-              </div>
-              <div className="space-y-0.5 px-2">
-                <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 cursor-pointer transition-colors">
-                  <Layers className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Vorlagen</span>
-                </div>
-
-                <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 cursor-pointer transition-colors">
-                  <Newspaper className="w-3.5 h-3.5 text-slate-400" />
-                  <span>News</span>
-                </div>
-              </div>
-            </div>
-
-            {/* EXTERN Section */}
-            <div>
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-4 py-1.5">
-                EXTERN
+                SYSTEM HEALTH
               </div>
               <div className="space-y-0.5 px-2">
                 <div className="flex items-center justify-between px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 cursor-pointer transition-colors">
@@ -236,7 +218,7 @@ export default function AppLayout() {
                 <div className="flex items-center justify-between px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 cursor-pointer transition-colors">
                   <div className="flex items-center gap-2.5">
                     <Database className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Postgres DB</span>
+                    <span>PostgreSQL DB</span>
                   </div>
                   <span className={`w-1.5 h-1.5 rounded-full ${isDbConnected ? 'bg-emerald-400' : 'bg-rose-400'}`} />
                 </div>
@@ -252,14 +234,14 @@ export default function AppLayout() {
             className="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             <Sliders className="w-3.5 h-3.5 text-slate-400" />
-            <span>Einstellungen</span>
+            <span>Settings & Diagnostics</span>
           </NavLink>
         </div>
       </aside>
 
       {/* Main Content View */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#0b0f19]">
-        {/* Top Navigation Bar matching screenshot */}
+        {/* Top Navigation Bar */}
         <header className="h-14 bg-[#0b0f19] border-b border-[#1a2233] flex items-center justify-between px-4 lg:px-6 z-30">
           <div className="flex items-center gap-3">
             <button
@@ -272,7 +254,7 @@ export default function AppLayout() {
               <Menu className="w-4 h-4 text-slate-500 hidden lg:block" />
               <span className="text-slate-400">Workspace</span>
               <span className="text-slate-600">/</span>
-              <span className="text-white font-medium">Plans</span>
+              <span className="text-white font-medium">Work Memory</span>
             </div>
           </div>
 
@@ -283,7 +265,7 @@ export default function AppLayout() {
               <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Suche..."
+                placeholder="Search memory, diffs, notes..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-56 lg:w-64 pl-8 pr-12 py-1.5 text-xs bg-[#121826] border border-[#1a2233] rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
@@ -298,27 +280,27 @@ export default function AppLayout() {
               <button className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
                 <Bell className="w-4 h-4" />
               </button>
-              <span className="absolute -top-1 -right-1 text-[9px] font-bold text-white bg-rose-600 rounded-full px-1 py-0.2 leading-tight">
-                99+
+              <span className="absolute -top-1 -right-1 text-[9px] font-bold text-white bg-blue-600 rounded-full px-1 py-0.2 leading-tight">
+                3
               </span>
             </div>
 
-            {/* Primary Blue Button: Importieren / Capture Session */}
+            {/* Primary Blue Button: Capture Session */}
             <NavLink
               to="/capture"
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-600/30 transition-all active:scale-95"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>Importieren</span>
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Capture Session</span>
             </NavLink>
 
-            {/* Secondary Button: Aktualisieren */}
+            {/* Secondary Button: Refresh */}
             <button
               onClick={handleRefresh}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121826] hover:bg-slate-800 border border-[#1a2233] text-slate-300 text-xs font-medium transition-colors"
             >
               <RotateCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-blue-400' : ''}`} />
-              <span className="hidden sm:inline">Aktualisieren</span>
+              <span className="hidden sm:inline">Refresh</span>
             </button>
           </div>
         </header>

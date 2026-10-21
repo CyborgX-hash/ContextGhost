@@ -1,268 +1,284 @@
 import { PrismaClient } from '@prisma/client';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log('🌱 Seeding ContextGhost development database with realistic workspaces & work memory...');
+async function seed() {
+  console.log('🌱 Seeding ContextGhost database with realistic developer work sessions in English...');
 
-  const currentRepoPath = path.resolve(__dirname, '../../..');
+  // 1. Clean previous data
+  await prisma.sessionNote.deleteMany();
+  await prisma.nextAction.deleteMany();
+  await prisma.issue.deleteMany();
+  await prisma.sessionFile.deleteMany();
+  await prisma.session.deleteMany();
+  await prisma.workspace.deleteMany();
 
-  // Define workspaces
+  // 2. Create realistic developer workspaces
   const workspacesData = [
-    { name: 'project_dashboard', rootPath: currentRepoPath, description: 'ContextGhost central dashboard and AI synthesis orchestrator' },
-    { name: 'proj_contypio', rootPath: '/Users/sakshamsontakke/Projects/contypio', description: 'Content-Management and Schema Editor platform' },
-    { name: 'steuerrecht-api', rootPath: '/Users/sakshamsontakke/Projects/steuerrecht-api', description: 'Tax law microservice and Perplexity API integration' },
-    { name: 'devbox-hetzner', rootPath: '/Users/sakshamsontakke/Projects/devbox-hetzner', description: 'Cloud coding server setup for remote agentic workflows' },
-    { name: 'vorlagen', rootPath: '/Users/sakshamsontakke/Projects/vorlagen', description: 'Enterprise SaaS design system and templates' },
-    { name: 'proj_seo-suite', rootPath: '/Users/sakshamsontakke/Projects/seo-suite', description: 'SEO collector, reporter, and gateway backend' },
-    { name: 'proj_irtours', rootPath: '/Users/sakshamsontakke/Projects/irtours', description: 'Travel platform CMS and relation types' }
-  ];
-
-  const workspaceMap = {};
-
-  for (const ws of workspacesData) {
-    const created = await prisma.workspace.upsert({
-      where: { rootPath: ws.rootPath },
-      update: { name: ws.name, description: ws.description },
-      create: { name: ws.name, rootPath: ws.rootPath, description: ws.description }
-    });
-    workspaceMap[ws.name] = created.id;
-  }
-
-  // Realistic sessions matching the reference design cards
-  const sessionsData = [
     {
-      wsName: 'project_dashboard',
-      title: 'Scheduled Tasks - Dashboard-Seite + RemoteTrigger',
-      date: new Date('2026-03-27T10:30:00Z'),
-      summary: 'Das Project Dashboard soll eine neue Seite "Scheduled Tasks" bekommen, auf der man Claude Code RemoteTrigger (persistent cron jobs) verwalten kann.',
-      objective: 'Implement persistent scheduled triggers and dashboard views for automated work memory capture.',
-      status: 'RAW_SNAPSHOT',
-      displayStatus: 'Entwurf',
-      tag: 'feature',
-      titleColor: 'white',
-      files: ['src/pages/ScheduledTasks.jsx', 'src/services/cronService.js']
+      name: 'ContextGhost',
+      rootPath: 'https://github.com/CyborgX-hash/ContextGhost.git',
+      description: 'Local-first and hosted open-weight AI developer work-memory assistant'
     },
     {
-      wsName: 'proj_contypio',
-      title: 'Schema Editor Slide-over + Navigation-Vereinfachung',
-      date: new Date('2026-03-26T14:15:00Z'),
-      summary: 'Contypio hat drei Content-Systeme (Pages, Collections, Singletons) mit unterschiedlichen Editoren und Navigations-Orten. Vereinheitlichung in slide-over.',
-      objective: 'Consolidate content schema editors into unified slide-over drawer with instant preview.',
-      status: 'SUCCESS',
-      displayStatus: 'Aktiv',
-      tag: 'plan',
-      titleColor: 'blue',
-      files: ['components/SchemaDrawer.tsx', 'navigation/Sidebar.tsx']
+      name: 'api-gateway',
+      rootPath: 'https://github.com/org/api-gateway.git',
+      description: 'Distributed microservices API gateway with JWT authentication & rate limiting'
     },
     {
-      wsName: 'project_dashboard',
-      title: 'Session-Analyse: Inhalt visuell verbessern',
-      date: new Date('2026-03-25T16:45:00Z'),
-      summary: 'Die Session-Analyse-Seite (/sessions/analysis) zeigt Daten korrekt an, aber die Darstellung ist monoton und flach. Farbige Status-Pills und Diff-Preview hinzugefuegt.',
-      objective: 'Revamp session analysis visuals with interactive charts and token-aware diff viewer.',
-      status: 'SUCCESS',
-      displayStatus: 'Erledigt',
-      tag: 'plan',
-      titleColor: 'green',
-      files: ['src/pages/SessionDetailPage.jsx', 'src/components/DiffViewer.jsx']
+      name: 'billing-service',
+      rootPath: 'https://github.com/org/billing-service.git',
+      description: 'Payment processor handling Stripe and Razorpay webhook events'
     },
     {
-      wsName: 'steuerrecht-api',
-      title: 'Perplexity API Integration in Steuerrecht-API + buchh',
-      date: new Date('2026-03-24T09:20:00Z'),
-      summary: '**Problem:** Steuerrechtliche Zuordnungen (EAR-Kennzahlen) werden manuell gepflegt und sind fehleranfaellig. Perplexity API fuer automatisches Matching anbinden.',
-      objective: 'Automate tax code classifications with hybrid keyword and LLM retrieval.',
-      status: 'RAW_SNAPSHOT',
-      displayStatus: 'Entwurf',
-      tag: 'bugfix',
-      titleColor: 'white',
-      files: ['api/perplexityClient.py', 'routes/classification.py']
-    },
-    {
-      wsName: 'steuerrecht-api',
-      title: 'Steuerrecht-API: Bestandsaufnahme & Erweiterungsplan',
-      date: new Date('2026-03-23T11:00:00Z'),
-      summary: 'Der User will wissen was die Steuerrecht-API bereits hat und was noch fehlt, um die naechste Session (Perplexity-Integration) vorzubereiten.',
-      objective: 'Audit existing endpoints and generate roadmap for vector embeddings.',
-      status: 'RAW_SNAPSHOT',
-      displayStatus: 'Entwurf',
-      tag: 'plan',
-      titleColor: 'white',
-      files: ['docs/AUDIT.md', 'openapi.yaml']
-    },
-    {
-      wsName: 'proj_contypio',
-      title: 'Webstudio-Konzept finalisieren & im Projekt ablegen',
-      date: new Date('2026-03-21T18:00:00Z'),
-      summary: 'Contypio braucht einen Design-Workflow fuer Nicht-Entwickler. Webstudio wird als visuelles Design-Tool integriert - es erzeugt saubere Komponenten.',
-      objective: 'Integrate visual drag-and-drop studio with headless CMS export.',
-      status: 'SUCCESS',
-      displayStatus: 'Erledigt',
-      tag: 'plan',
-      titleColor: 'green',
-      files: ['studio/Editor.jsx', 'studio/exporter.js']
-    },
-    {
-      wsName: 'devbox-hetzner',
-      title: 'Claude Code auf Hetzner Coding-Server einrichten',
-      date: new Date('2026-03-21T13:10:00Z'),
-      summary: 'Neuer Hetzner Cloud Server (46.224.78.95:22222, User: admin) soll als Coding-Box fuer zwei Claude Max Accounts eingerichtet werden.',
-      objective: 'Provision isolated remote Docker environment with persistent tmux sessions.',
-      status: 'SUCCESS',
-      displayStatus: 'Erledigt',
-      tag: 'infra',
-      titleColor: 'green',
-      files: ['ansible/setup.yml', 'docker-compose.server.yml']
-    },
-    {
-      wsName: 'vorlagen',
-      title: 'Enterprise SaaS Dashboard Redesign',
-      date: new Date('2026-03-20T15:30:00Z'),
-      summary: 'Das Dashboard hat 14 Jinja2-Templates, 13 CSS-Dateien (2.469 Zeilen custom CSS), 24 JS-Dateien. Kein CSS-Framework, kein modern bundler.',
-      objective: 'Refactor bespoke CSS into streamlined modern Tailwind component library.',
-      status: 'RAW_SNAPSHOT',
-      displayStatus: 'Entwurf',
-      tag: 'refactor',
-      titleColor: 'white',
-      files: ['templates/dashboard.html', 'static/css/theme.css']
-    },
-    {
-      wsName: 'steuerrecht-api',
-      title: 'Steuerrecht-API: Eigenstaendiger Microservice',
-      date: new Date('2026-03-19T08:45:00Z'),
-      summary: 'Auslagerung der Steuer-Logik aus der Monolith-Datenbank in einen eigenstaendigen FastAPI Microservice mit PostgreSQL und Alembic.',
-      objective: 'Decouple tax calculation engine into independent scalable service.',
-      status: 'RAW_SNAPSHOT',
-      displayStatus: 'Entwurf',
-      tag: 'plan',
-      titleColor: 'white',
-      files: ['services/tax_calc.py', 'Dockerfile']
-    },
-    {
-      wsName: 'proj_seo-suite',
-      title: 'S4 Block 1 — API Gateway Backend',
-      date: new Date('2026-03-16T17:20:00Z'),
-      summary: 'AI SEO Suite hat 4 Services (Collector, Dashboard, Reporter, Writer) aber KEIN Auth-System. Der Gateway wird zentraler Eintrittspunkt.',
-      objective: 'Implement reverse proxy gateway with rate limiting and JWT auth verification.',
-      status: 'RAW_SNAPSHOT',
-      displayStatus: 'Entwurf',
-      tag: 'plan',
-      titleColor: 'white',
-      files: ['gateway/proxy.go', 'gateway/auth.go']
-    },
-    {
-      wsName: 'project_dashboard',
-      title: 'Claude Code Sessions im Dashboard',
-      date: new Date('2026-03-14T12:00:00Z'),
-      summary: 'Automatische Synchronisation aller lokalen Terminal-Sessions in die PostgreSQL-Datenbank mit strukturierter Zusammenfassung.',
-      objective: 'Bridge terminal session logs with ContextGhost local work memory persistence.',
-      status: 'SUCCESS',
-      displayStatus: 'Erledigt',
-      tag: 'plan',
-      titleColor: 'green',
-      files: ['apps/api/src/services/sessionService.js', 'apps/api/src/ai/promptBuilder.js']
-    },
-    {
-      wsName: 'proj_irtours',
-      title: 'Sprint-Plan: Relations-Feldtyp + CMS-Qualitaet',
-      date: new Date('2026-03-11T16:00:00Z'),
-      summary: 'Unterstuetzung von 1-zu-N und N-zu-M Beziehungen im dynamischen Datenmodell sowie Validierungsregeln fuer Redakteure.',
-      objective: 'Add polymorphic relation fields and nested validation schemas.',
-      status: 'SUCCESS',
-      displayStatus: 'Erledigt',
-      tag: 'feature',
-      titleColor: 'green',
-      files: ['models/relations.js', 'validators/schemaValidator.js']
+      name: 'frontend-web',
+      rootPath: 'https://github.com/org/frontend-web.git',
+      description: 'Modern developer dashboard built with Vite, React, and Tailwind CSS'
     }
   ];
 
-  for (const s of sessionsData) {
-    const wsId = workspaceMap[s.wsName];
-    if (!wsId) continue;
+  const createdWorkspaces = {};
+  for (const ws of workspacesData) {
+    const record = await prisma.workspace.create({ data: ws });
+    createdWorkspaces[ws.name] = record;
+  }
 
-    const existing = await prisma.session.findFirst({
-      where: { workspaceId: wsId, title: s.title }
+  // 3. Realistic session data
+  const sessions = [
+    {
+      wsName: 'ContextGhost',
+      title: 'Hosted Open-Weight AI Provider Integration',
+      mainObjective: 'Connect OpenRouter hosted AI inference with bounded retries and timeout protection',
+      summary: 'Added OpenRouterProvider with support for open-weight models (Llama 3.3, Qwen 2.5) on Render. Created context upload validator to enforce 1MB file limits and reject .env files.',
+      captureStatus: 'SUCCESS',
+      modelName: 'qwen/qwen3.8-27b',
+      tag: 'feature',
+      displayStatus: 'In Progress',
+      hoursAgo: 1,
+      files: [
+        { path: 'apps/api/src/ai/openrouterProvider.js', changeType: 'added', evidenceSummary: 'OpenRouter client with 401/402/429 error handling' },
+        { path: 'apps/api/src/utils/contextUploadValidator.js', changeType: 'added', evidenceSummary: 'Security guardrails for text files & patch uploads' },
+        { path: 'apps/web/src/pages/CaptureSessionPage.jsx', changeType: 'modified', evidenceSummary: 'Added pasted diff input and context file attachments' }
+      ],
+      issues: [
+        {
+          title: 'Verify OpenRouter production latency on Render container',
+          description: 'Measure cold-start response times from Render backend to openrouter.ai/api/v1',
+          category: 'unresolved_todo',
+          severity: 'medium',
+          status: 'unresolved'
+        }
+      ],
+      nextActions: [
+        { title: 'Deploy backend web service to Render', description: 'Configure OPENROUTER_API_KEY and DATABASE_URL in Render dashboard', priority: 1 },
+        { title: 'Deploy frontend static site to Vercel', description: 'Set VITE_API_BASE_URL to point to deployed Render API endpoint', priority: 2 },
+        { title: 'Run end-to-end production verification test', description: 'Perform session capture with pasted diff and verify PostgreSQL persistence', priority: 3 }
+      ]
+    },
+    {
+      wsName: 'billing-service',
+      title: 'Stripe Webhook Signature Verification & Idempotency',
+      mainObjective: 'Fix duplicate payment events and verify webhook signature headers',
+      summary: 'Configured HMAC-SHA256 signature verification for incoming Stripe webhook events. Added PostgreSQL transaction with unique event IDs to prevent duplicate balance credits.',
+      captureStatus: 'SUCCESS',
+      modelName: 'qwen/qwen3.8-27b',
+      tag: 'bugfix',
+      displayStatus: 'Resolved',
+      hoursAgo: 4,
+      files: [
+        { path: 'src/controllers/webhookController.js', changeType: 'modified', evidenceSummary: 'Signature verification middleware' },
+        { path: 'src/services/paymentService.js', changeType: 'modified', evidenceSummary: 'Idempotency key checks in database transaction' }
+      ],
+      issues: [],
+      nextActions: [
+        { title: 'Test edge case for expired webhook timestamps', description: 'Verify rejection if timestamp is older than 5 minutes', priority: 1 }
+      ]
+    },
+    {
+      wsName: 'api-gateway',
+      title: 'OAuth2 Refresh Token Rotation & Session Revocation',
+      mainObjective: 'Implement secure refresh token reuse detection and instant session revocation',
+      summary: 'Added Redis-backed refresh token family tracking. If an expired or already-used token is presented, all refresh tokens in that family are immediately revoked.',
+      captureStatus: 'SUCCESS',
+      modelName: 'qwen/qwen3.8-27b',
+      tag: 'feature',
+      displayStatus: 'Resolved',
+      hoursAgo: 24,
+      files: [
+        { path: 'src/auth/tokenManager.js', changeType: 'modified', evidenceSummary: 'Token family rotation logic' },
+        { path: 'tests/tokenRotation.test.js', changeType: 'added', evidenceSummary: 'Unit tests for malicious reuse attempt detection' }
+      ],
+      issues: [],
+      nextActions: [
+        { title: 'Add Prometheus metrics for revoked token attempts', description: 'Expose security alert counter for reuse anomalies', priority: 1 }
+      ]
+    },
+    {
+      wsName: 'ContextGhost',
+      title: 'Database Connection Pool Tuning & Prisma Migration',
+      mainObjective: 'Migrate to pooled PostgreSQL instance and verify migration resilience',
+      summary: 'Updated Prisma schema with relational indexes across workspaceId, sessionId, and capturedAt. Successfully ran migration against cloud database pool.',
+      captureStatus: 'SUCCESS',
+      modelName: 'qwen/qwen3.8-27b',
+      tag: 'infra',
+      displayStatus: 'Resolved',
+      hoursAgo: 48,
+      files: [
+        { path: 'apps/api/prisma/schema.prisma', changeType: 'modified', evidenceSummary: 'Added index directives for faster querying' }
+      ],
+      issues: [],
+      nextActions: [
+        { title: 'Monitor database connection counts under load', description: 'Ensure pool size stays within provider limits', priority: 1 }
+      ]
+    },
+    {
+      wsName: 'frontend-web',
+      title: 'Dark Developer Dashboard Theme & Layout Polish',
+      mainObjective: 'Refine charcoal theme aesthetics, status indicators, and responsive sidebar',
+      summary: 'Polished dashboard layout with clear typography, Lucide icons, status badges, and mobile-responsive navigation drawer.',
+      captureStatus: 'SUCCESS',
+      modelName: 'qwen/qwen3.8-27b',
+      tag: 'refactor',
+      displayStatus: 'In Progress',
+      hoursAgo: 72,
+      files: [
+        { path: 'apps/web/src/layouts/AppLayout.jsx', changeType: 'modified', evidenceSummary: 'Sidebar layout and status indicators' },
+        { path: 'apps/web/src/pages/OverviewDashboard.jsx', changeType: 'modified', evidenceSummary: 'Metric KPI cards and session grid' }
+      ],
+      issues: [
+        {
+          title: 'Ensure clean contrast ratio on low-brightness screens',
+          description: 'Check slate-400 text readability on near-black backgrounds',
+          category: 'unresolved_todo',
+          severity: 'low',
+          status: 'unresolved'
+        }
+      ],
+      nextActions: [
+        { title: 'Test responsive drawer on mobile viewports', description: 'Confirm touch gestures and backdrop blur close behavior', priority: 1 }
+      ]
+    },
+    {
+      wsName: 'api-gateway',
+      title: 'Rate Limiting Redis Fallback on Memory Pressure',
+      mainObjective: 'Add graceful in-memory token bucket fallback when Redis cluster is unreachable',
+      summary: 'Implemented a circuit breaker around Redis rate limit counters. When Redis latency spikes above 200ms, the gateway falls back to local in-memory token buckets.',
+      captureStatus: 'RAW_SNAPSHOT',
+      modelName: null,
+      tag: 'infra',
+      displayStatus: 'Raw Snapshot',
+      hoursAgo: 96,
+      files: [
+        { path: 'src/middleware/rateLimiter.js', changeType: 'modified', evidenceSummary: 'Circuit breaker fallback logic' }
+      ],
+      issues: [
+        {
+          title: 'Memory leak risk if in-memory fallback runs indefinitely',
+          description: 'Implement LRU eviction for local token buckets',
+          category: 'error',
+          severity: 'medium',
+          status: 'unresolved'
+        }
+      ],
+      nextActions: [
+        { title: 'Add LRU cache size limit to local token bucket', description: 'Cap local storage at 50,000 active client IPs', priority: 1 }
+      ]
+    }
+  ];
+
+  for (const s of sessions) {
+    const ws = createdWorkspaces[s.wsName];
+    if (!ws) continue;
+
+    const capturedDate = new Date(Date.now() - s.hoursAgo * 60 * 60 * 1000);
+
+    const createdSession = await prisma.session.create({
+      data: {
+        workspaceId: ws.id,
+        title: s.title,
+        mainObjective: s.mainObjective,
+        summary: s.summary,
+        captureStatus: s.captureStatus,
+        modelName: s.modelName,
+        capturedAt: capturedDate,
+        createdAt: capturedDate,
+        updatedAt: capturedDate,
+        rawSnapshot: {
+          capturedAt: capturedDate.toISOString(),
+          workspaceName: ws.name,
+          workspacePath: ws.rootPath,
+          notes: s.mainObjective
+        },
+        analysis: {
+          sessionTitle: s.title,
+          mainObjective: s.mainObjective,
+          summary: s.summary,
+          tag: s.tag,
+          displayStatus: s.displayStatus,
+          accomplishments: [`Completed ${s.files.length} file updates`, 'Verified test suite and safety checks']
+        }
+      }
     });
 
-    if (!existing) {
-      await prisma.session.create({
+    // Files
+    for (const file of s.files) {
+      await prisma.sessionFile.create({
         data: {
-          workspaceId: wsId,
-          title: s.title,
-          summary: s.summary,
-          mainObjective: s.objective,
-          capturedAt: s.date,
-          captureStatus: s.status,
-          modelName: 'qwen2.5:1.5b',
-          confidenceNotes: `Tag: ${s.tag} | Display: ${s.displayStatus}`,
-          analysis: {
-            sessionTitle: s.title,
-            mainObjective: s.objective,
-            summary: s.summary,
-            tag: s.tag,
-            displayStatus: s.displayStatus,
-            accomplishments: [
-              'Captured workspace working tree context',
-              'Analyzed diff excerpts and log traces',
-              'Recorded prioritized next steps'
-            ],
-            modifiedFiles: s.files.map((f) => ({
-              path: f,
-              changeType: 'modified',
-              evidenceSummary: 'Identified in session commit history'
-            })),
-            unresolvedIssues: s.status === 'RAW_SNAPSHOT' ? [
-              {
-                title: 'Pending implementation review',
-                category: 'unresolved_todo',
-                severity: 'medium',
-                status: 'unresolved',
-                evidence: 'Work in progress draft state'
-              }
-            ] : [],
-            nextActions: [
-              {
-                title: 'Continue implementation on active branch',
-                description: 'Review pending changes and execute test suite.',
-                priority: 1,
-                filePath: s.files[0] || null
-              }
-            ]
-          },
-          files: {
-            create: s.files.map((f) => ({
-              path: f,
-              changeType: 'modified',
-              evidenceSummary: 'Active workspace change'
-            }))
-          },
-          nextActions: {
-            create: [
-              {
-                title: 'Continue implementation on active branch',
-                description: 'Review pending changes and execute test suite.',
-                priority: 1,
-                filePath: s.files[0] || null
-              }
-            ]
-          }
+          sessionId: createdSession.id,
+          path: file.path,
+          changeType: file.changeType,
+          evidenceSummary: file.evidenceSummary,
+          createdAt: capturedDate
         }
       });
     }
+
+    // Issues
+    for (const iss of s.issues) {
+      await prisma.issue.create({
+        data: {
+          sessionId: createdSession.id,
+          title: iss.title,
+          description: iss.description,
+          category: iss.category,
+          severity: iss.severity,
+          status: iss.status,
+          createdAt: capturedDate
+        }
+      });
+    }
+
+    // Next Actions
+    for (const act of s.nextActions) {
+      await prisma.nextAction.create({
+        data: {
+          sessionId: createdSession.id,
+          title: act.title,
+          description: act.description,
+          priority: act.priority,
+          status: 'pending',
+          createdAt: capturedDate
+        }
+      });
+    }
+
+    // Note
+    await prisma.sessionNote.create({
+      data: {
+        sessionId: createdSession.id,
+        content: `Work session recorded for ${ws.name} on ${s.title}. Ready for resumption.`,
+        createdAt: capturedDate,
+        updatedAt: capturedDate
+      }
+    });
   }
 
-  console.log('🎉 Database seeding with realistic dashboard cards completed successfully.');
+  console.log('🎉 ContextGhost database seeded successfully with realistic English work sessions!');
 }
 
-main()
+seed()
   .catch((e) => {
-    console.error('❌ Seeding failed:', e);
+    console.error('Seed error:', e);
     process.exit(1);
   })
   .finally(async () => {

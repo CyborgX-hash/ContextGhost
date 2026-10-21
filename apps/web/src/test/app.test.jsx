@@ -16,7 +16,7 @@ describe('ContextGhost App Frontend', () => {
               data: [
                 {
                   id: 'ws-123',
-                  name: 'project_dashboard',
+                  name: 'ContextGhost',
                   rootPath: '/Users/test/Context-Ghost',
                   _count: { sessions: 2 },
                   sessions: []
@@ -35,7 +35,7 @@ describe('ContextGhost App Frontend', () => {
               data: {
                 status: 'ready',
                 database: { connected: true },
-                aiEngine: { connected: true, modelAvailable: true, configuredModel: 'qwen2.5:1.5b' }
+                aiEngine: { connected: true, modelAvailable: true, configuredModel: 'qwen/qwen3.8-27b' }
               }
             })
         });
@@ -53,15 +53,15 @@ describe('ContextGhost App Frontend', () => {
                   {
                     id: 'sess-1',
                     workspaceId: 'ws-123',
-                    title: 'Scheduled Tasks - Dashboard-Seite + RemoteTrigger',
-                    summary: 'Das Project Dashboard soll eine neue Seite Scheduled Tasks bekommen.',
+                    title: 'Hosted Open-Weight AI Provider Integration',
+                    summary: 'Added OpenRouterProvider with support for open-weight models on Render.',
                     capturedAt: new Date().toISOString(),
                     captureStatus: 'SUCCESS',
                     analysis: {
-                      displayStatus: 'Aktiv',
+                      displayStatus: 'In Progress',
                       tag: 'feature'
                     },
-                    workspace: { name: 'project_dashboard' }
+                    workspace: { name: 'ContextGhost' }
                   }
                 ]
               }
@@ -79,23 +79,23 @@ describe('ContextGhost App Frontend', () => {
   it('renders dashboard brand and sidebar sections', async () => {
     render(<App />);
 
-    expect(screen.getAllByText('Dashboard').length).toBeGreaterThan(0);
-    expect(screen.getByText('WORKSPACE')).toBeInTheDocument();
-    expect(screen.getByText('DEVOPS')).toBeInTheDocument();
-    expect(screen.getAllByText('Projekte').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Plans').length).toBeGreaterThan(0);
-    expect(screen.getByText('Importieren')).toBeInTheDocument();
+    expect(screen.getAllByText('ContextGhost').length).toBeGreaterThan(0);
+    expect(screen.getByText('WORK MEMORY')).toBeInTheDocument();
+    expect(screen.getByText('DEVELOPER CONTEXT')).toBeInTheDocument();
+    expect(screen.getAllByText('Workspaces').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Active Plans').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Capture Session').length).toBeGreaterThan(0);
   });
 
   it('renders top KPI metric cards and session card in grid', async () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText('UMSETZUNG')).toBeInTheDocument();
-      expect(screen.getByText('PIPELINE')).toBeInTheDocument();
-      expect(screen.getByText('AKTIVITAET')).toBeInTheDocument();
-      expect(screen.getByText('ABDECKUNG')).toBeInTheDocument();
-      expect(screen.getByText(/Scheduled Tasks - Dashboard-Seite/i)).toBeInTheDocument();
+      expect(screen.getByText('RESUMPTION READINESS')).toBeInTheDocument();
+      expect(screen.getByText('WORK PIPELINE')).toBeInTheDocument();
+      expect(screen.getByText('30-DAY ACTIVITY')).toBeInTheDocument();
+      expect(screen.getByText('WORKSPACE COVERAGE')).toBeInTheDocument();
+      expect(screen.getByText(/Hosted Open-Weight AI Provider Integration/i)).toBeInTheDocument();
     });
   });
 });

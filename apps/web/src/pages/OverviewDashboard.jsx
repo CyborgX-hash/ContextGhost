@@ -2,25 +2,21 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Folder,
-  ChevronRight,
   FileText,
-  Sparkles,
   Link2,
   Disc,
   GitBranch,
   Zap,
-  Target,
-  Clock,
-  ArrowRight
+  Target
 } from 'lucide-react';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { api } from '../services/api';
 
 export default function OverviewDashboard() {
-  const { workspaces, activeWorkspace, selectWorkspace } = useWorkspace();
+  const { workspaces } = useWorkspace();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState('Alle'); // Alle, Entwurf, Aktiv, Erledigt, Archiv
+  const [statusFilter, setStatusFilter] = useState('All'); // All, In Progress, Resolved, Drafts, Raw Snapshots
   const [projectFilter, setProjectFilter] = useState('all'); // 'all' or workspaceId
   const navigate = useNavigate();
 
@@ -48,9 +44,9 @@ export default function OverviewDashboard() {
     let draft = 0;
 
     sessions.forEach((s) => {
-      const displayStatus = s.analysis?.displayStatus || (s.captureStatus === 'SUCCESS' ? 'Erledigt' : 'Entwurf');
-      if (displayStatus === 'Erledigt') completed++;
-      else if (displayStatus === 'Aktiv') active++;
+      const displayStatus = s.analysis?.displayStatus || (s.captureStatus === 'SUCCESS' ? 'Resolved' : 'Drafts');
+      if (displayStatus === 'Resolved' || displayStatus === 'Erledigt') completed++;
+      else if (displayStatus === 'In Progress' || displayStatus === 'Aktiv') active++;
       else draft++;
     });
 
@@ -64,22 +60,33 @@ export default function OverviewDashboard() {
       total,
       totalPlans30Days: total + 14,
       thisWeek: 8,
-      workspaceCount: workspaces.length || 7,
-      unassignedCount: 3,
-      mostActiveWorkspace: workspaces[0]?.name || 'proj_irtours'
+      workspaceCount: workspaces.length || 4,
+      unassignedCount: 0,
+      mostActiveWorkspace: workspaces[0]?.name || 'ContextGhost'
     };
   }, [sessions, workspaces]);
+
+  // Normalize status for filtering
+  const normalizeStatus = (statusStr) => {
+    if (!statusStr) return 'Drafts';
+    if (statusStr === 'Erledigt' || statusStr === 'Resolved') return 'Resolved';
+    if (statusStr === 'Aktiv' || statusStr === 'In Progress') return 'In Progress';
+    if (statusStr === 'Raw Snapshot' || statusStr === 'RAW_SNAPSHOT') return 'Raw Snapshots';
+    return 'Drafts';
+  };
 
   // Filter sessions based on pills & dropdown
   const filteredSessions = useMemo(() => {
     return sessions.filter((s) => {
       // 1. Status Filter
-      const displayStatus = s.analysis?.displayStatus || (s.captureStatus === 'SUCCESS' ? 'Erledigt' : 'Entwurf');
-      if (statusFilter !== 'Alle') {
-        if (statusFilter === 'Entwurf' && displayStatus !== 'Entwurf') return false;
-        if (statusFilter === 'Aktiv' && displayStatus !== 'Aktiv') return false;
-        if (statusFilter === 'Erledigt' && displayStatus !== 'Erledigt') return false;
-        if (statusFilter === 'Archiv' && s.captureStatus !== 'ARCHIVED') return false;
+      const rawStatus = s.analysis?.displayStatus || (s.captureStatus === 'SUCCESS' ? 'Resolved' : 'Drafts');
+      const normalized = normalizeStatus(rawStatus);
+
+      if (statusFilter !== 'All') {
+        if (statusFilter === 'In Progress' && normalized !== 'In Progress') return false;
+        if (statusFilter === 'Resolved' && normalized !== 'Resolved') return false;
+        if (statusFilter === 'Drafts' && normalized !== 'Drafts') return false;
+        if (statusFilter === 'Raw Snapshots' && (normalized !== 'Raw Snapshots' && s.captureStatus !== 'RAW_SNAPSHOT')) return false;
       }
 
       // 2. Project Filter
@@ -92,100 +99,101 @@ export default function OverviewDashboard() {
   }, [sessions, statusFilter, projectFilter]);
 
   const formatDate = (dateString) => {
-    if (!dateString) return '27.03.2026';
+    if (!dateString) return 'Oct 21, 2026';
     const d = new Date(dateString);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    return `${day}.${month}.${year}`;
+    return d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-6">
-      {/* 1. TOP 4 METRIC CARDS ROW matching screenshot */}
+      {/* 1. TOP 4 METRIC CARDS ROW */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: UMSETZUNG */}
+        {/* Card 1: RESUMPTION READINESS */}
         <div className="bg-[#121826] border border-[#1a2233] rounded-xl p-4 flex flex-col justify-between">
           <div className="flex items-center gap-1.5 text-slate-400 text-xs font-semibold uppercase tracking-wider">
             <Disc className="w-3.5 h-3.5 text-slate-400" />
-            <span>UMSETZUNG</span>
+            <span>RESUMPTION READINESS</span>
           </div>
           <div className="my-2">
             <span className="text-3xl font-extrabold text-white tracking-tight">{metrics.completionRate}%</span>
           </div>
           <div className="text-xs text-slate-400">
-            {metrics.completed} erledigt / {metrics.total} gesamt
+            {metrics.completed} resolved / {metrics.total} total sessions
           </div>
         </div>
 
-        {/* Card 2: PIPELINE */}
+        {/* Card 2: WORK PIPELINE */}
         <div className="bg-[#121826] border border-[#1a2233] rounded-xl p-4 flex flex-col justify-between">
           <div className="flex items-center gap-1.5 text-slate-400 text-xs font-semibold uppercase tracking-wider">
             <GitBranch className="w-3.5 h-3.5 text-slate-400" />
-            <span>PIPELINE</span>
+            <span>WORK PIPELINE</span>
           </div>
           <div className="my-2 flex items-center justify-between text-white font-mono">
             <div className="text-center">
               <span className="text-2xl font-extrabold text-white">{metrics.draft}</span>
-              <span className="block text-[10px] text-slate-400 font-sans">Entwurf</span>
+              <span className="block text-[10px] text-slate-400 font-sans">Drafts</span>
             </div>
             <span className="text-slate-600 text-xs">&gt;</span>
             <div className="text-center">
               <span className="text-2xl font-extrabold text-blue-400">{metrics.active}</span>
-              <span className="block text-[10px] text-slate-400 font-sans">Aktiv</span>
+              <span className="block text-[10px] text-slate-400 font-sans">In Progress</span>
             </div>
             <span className="text-slate-600 text-xs">&gt;</span>
             <div className="text-center">
               <span className="text-2xl font-extrabold text-white">{metrics.completed}</span>
-              <span className="block text-[10px] text-slate-400 font-sans">Erledigt</span>
+              <span className="block text-[10px] text-slate-400 font-sans">Resolved</span>
             </div>
           </div>
-          <div className="text-[11px] text-slate-500">Automatischer Workflow</div>
+          <div className="text-[11px] text-slate-500">Automated AI Context Sync</div>
         </div>
 
-        {/* Card 3: AKTIVITAET */}
+        {/* Card 3: 30-DAY ACTIVITY */}
         <div className="bg-[#121826] border border-[#1a2233] rounded-xl p-4 flex flex-col justify-between">
           <div className="flex items-center gap-1.5 text-slate-400 text-xs font-semibold uppercase tracking-wider">
             <Zap className="w-3.5 h-3.5 text-slate-400" />
-            <span>AKTIVITAET</span>
+            <span>30-DAY ACTIVITY</span>
           </div>
           <div className="my-2">
             <span className="text-3xl font-extrabold text-white tracking-tight">{metrics.totalPlans30Days}</span>
           </div>
           <div className="text-xs text-slate-400 space-y-0.5">
-            <div>Plans letzte 30 Tage</div>
-            <div className="text-[11px] text-slate-500">davon {metrics.thisWeek} diese Woche</div>
+            <div>Sessions recorded last 30 days</div>
+            <div className="text-[11px] text-slate-500">{metrics.thisWeek} recorded this week</div>
           </div>
         </div>
 
-        {/* Card 4: ABDECKUNG */}
+        {/* Card 4: WORKSPACE COVERAGE */}
         <div className="bg-[#121826] border border-[#1a2233] rounded-xl p-4 flex flex-col justify-between">
           <div className="flex items-center gap-1.5 text-slate-400 text-xs font-semibold uppercase tracking-wider">
             <Target className="w-3.5 h-3.5 text-slate-400" />
-            <span>ABDECKUNG</span>
+            <span>WORKSPACE COVERAGE</span>
           </div>
           <div className="my-2 flex items-baseline gap-4">
             <div>
               <span className="text-2xl font-extrabold text-blue-400 mr-1.5">{metrics.workspaceCount}</span>
-              <span className="text-xs text-slate-300">Projekte</span>
+              <span className="text-xs text-slate-300">Workspaces</span>
             </div>
             <div>
               <span className="text-2xl font-extrabold text-white mr-1.5">{metrics.unassignedCount}</span>
-              <span className="text-xs text-slate-400">Ohne Projekt</span>
+              <span className="text-xs text-slate-400">Global</span>
             </div>
           </div>
           <div className="text-xs text-slate-400 truncate">
-            Aktivstes: <strong className="text-slate-200 font-medium">{metrics.mostActiveWorkspace}</strong> (11)
+            Most active: <strong className="text-slate-200 font-medium">{metrics.mostActiveWorkspace}</strong>
           </div>
         </div>
       </div>
 
-      {/* 2. FILTER PILLS & PROJECT DROPDOWN ROW matching screenshot */}
+      {/* 2. FILTER PILLS & WORKSPACE DROPDOWN ROW */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
         {/* Status Pill Buttons */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
           <span className="text-xs text-slate-400 font-medium mr-1">Status:</span>
-          {['Alle', 'Entwurf', 'Aktiv', 'Erledigt', 'Archiv'].map((status) => (
+          {['All', 'In Progress', 'Resolved', 'Drafts', 'Raw Snapshots'].map((status) => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
@@ -200,15 +208,15 @@ export default function OverviewDashboard() {
           ))}
         </div>
 
-        {/* Project Dropdown */}
+        {/* Workspace Dropdown */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="text-xs text-slate-400 font-medium">Projekt:</span>
+          <span className="text-xs text-slate-400 font-medium">Workspace:</span>
           <select
             value={projectFilter}
             onChange={(e) => setProjectFilter(e.target.value)}
             className="px-3 py-1 bg-[#121826] border border-[#1a2233] text-xs text-slate-200 rounded-md focus:outline-none focus:border-blue-500 font-medium cursor-pointer"
           >
-            <option value="all">Alle Projekte</option>
+            <option value="all">All Workspaces</option>
             {workspaces.map((w) => (
               <option key={w.id} value={w.id}>
                 {w.name}
@@ -218,7 +226,7 @@ export default function OverviewDashboard() {
         </div>
       </div>
 
-      {/* 3. 3-COLUMN CARDS GRID matching reference design */}
+      {/* 3. 3-COLUMN CARDS GRID */}
       {loading ? (
         <div className="flex justify-center py-20">
           <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -226,14 +234,15 @@ export default function OverviewDashboard() {
       ) : filteredSessions.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredSessions.map((session) => {
-            const displayStatus = session.analysis?.displayStatus || (session.captureStatus === 'SUCCESS' ? 'Erledigt' : 'Entwurf');
-            const tag = session.analysis?.tag || 'plan';
+            const rawStatus = session.analysis?.displayStatus || (session.captureStatus === 'SUCCESS' ? 'Resolved' : 'Drafts');
+            const displayStatus = normalizeStatus(rawStatus);
+            const tag = session.analysis?.tag || 'feature';
 
-            // Determine title color accent matching reference image
+            // Determine title color accent
             let titleColorClass = 'text-white';
-            if (displayStatus === 'Aktiv') {
+            if (displayStatus === 'In Progress') {
               titleColorClass = 'text-blue-400';
-            } else if (displayStatus === 'Erledigt') {
+            } else if (displayStatus === 'Resolved') {
               titleColorClass = 'text-emerald-400';
             }
 
@@ -244,11 +253,11 @@ export default function OverviewDashboard() {
                 className="bg-[#121826] border border-[#1a2233] hover:border-slate-700/80 rounded-xl p-4 flex flex-col justify-between transition-all cursor-pointer group shadow-sm hover:shadow-lg hover:shadow-black/20"
               >
                 <div>
-                  {/* Card Top: Folder + Date */}
+                  {/* Card Top: Workspace + Date */}
                   <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
                     <div className="flex items-center gap-1.5 truncate max-w-[200px]">
                       <Folder className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span className="truncate">{session.workspace?.name || 'project_dashboard'}</span>
+                      <span className="truncate">{session.workspace?.name || 'ContextGhost'}</span>
                     </div>
                     <span className="text-slate-500 text-[11px] shrink-0">
                       {formatDate(session.capturedAt)}
@@ -278,10 +287,12 @@ export default function OverviewDashboard() {
                     {/* Status Pill */}
                     <span
                       className={`text-[10px] font-mono px-2 py-0.5 rounded ${
-                        displayStatus === 'Aktiv'
+                        displayStatus === 'In Progress'
                           ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30 font-semibold'
-                          : displayStatus === 'Erledigt'
+                          : displayStatus === 'Resolved'
                           ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold'
+                          : displayStatus === 'Raw Snapshots'
+                          ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-semibold'
                           : 'bg-[#1a2233] text-slate-400 font-medium'
                       }`}
                     >
@@ -289,14 +300,14 @@ export default function OverviewDashboard() {
                     </span>
                   </div>
 
-                  {/* Session Link Badge */}
+                  {/* Resume Session Link */}
                   <NavLink
                     to={`/sessions/${session.id}`}
                     onClick={(e) => e.stopPropagation()}
                     className="flex items-center gap-1 text-[11px] text-blue-400 hover:text-blue-300 font-mono hover:underline"
                   >
                     <Link2 className="w-3 h-3" />
-                    <span>Session</span>
+                    <span>Resume Session</span>
                   </NavLink>
                 </div>
               </div>
@@ -306,9 +317,9 @@ export default function OverviewDashboard() {
       ) : (
         <div className="bg-[#121826] border border-[#1a2233] rounded-xl p-12 text-center space-y-2">
           <Disc className="w-8 h-8 text-slate-600 mx-auto" />
-          <h3 className="text-sm font-semibold text-white">Keine Pläne für diesen Filter</h3>
+          <h3 className="text-sm font-semibold text-white">No sessions found for this filter</h3>
           <p className="text-xs text-slate-400">
-            Wähle einen anderen Status oder klicke oben auf "Importieren", um einen neuen Work-Context aufzuzeichnen.
+            Select a different filter or click "Capture Session" in the top bar to record a developer work session.
           </p>
         </div>
       )}
