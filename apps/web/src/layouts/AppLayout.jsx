@@ -20,7 +20,8 @@ import {
   Bell,
   RotateCw,
   PlusCircle,
-  Activity
+  Activity,
+  BookOpen
 } from 'lucide-react';
 import { useWorkspace } from '../context/WorkspaceContext';
 
@@ -161,6 +162,20 @@ export default function AppLayout() {
                 >
                   <Search className="w-3.5 h-3.5 text-slate-400" />
                   <span>Search Memory</span>
+                </NavLink>
+
+                <NavLink
+                  to="/guide"
+                  className={({ isActive }) =>
+                    `flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                      isActive
+                        ? 'text-white bg-violet-600/20 text-violet-300 border-l-2 border-violet-500'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+                    }`
+                  }
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-violet-400" />
+                  <span>User Guide & Manual</span>
                 </NavLink>
               </div>
             </div>

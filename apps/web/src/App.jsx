@@ -9,6 +9,7 @@ import SessionDetailPage from './pages/SessionDetailPage';
 import SessionHistoryPage from './pages/SessionHistoryPage';
 import SearchMemoryPage from './pages/SearchMemoryPage';
 import SettingsPage from './pages/SettingsPage';
+import UserGuidePage from './pages/UserGuidePage';
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="sessions" element={<SessionHistoryPage />} />
             <Route path="sessions/:id" element={<SessionDetailPage />} />
             <Route path="search" element={<SearchMemoryPage />} />
+            <Route path="guide" element={<UserGuidePage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
