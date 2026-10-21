@@ -7,7 +7,9 @@ import {
   Disc,
   GitBranch,
   Zap,
-  Target
+  Target,
+  FolderGit2,
+  PlusCircle
 } from 'lucide-react';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { api } from '../services/api';
@@ -313,6 +315,23 @@ export default function OverviewDashboard() {
               </div>
             );
           })}
+        </div>
+      ) : workspaces.length === 0 ? (
+        <div className="bg-[#121826] border border-[#1a2233] rounded-xl p-12 text-center space-y-4">
+          <FolderGit2 className="w-12 h-12 text-violet-400/60 mx-auto" />
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold text-white">Welcome to ContextGhost</h3>
+            <p className="text-xs text-slate-400 max-w-md mx-auto">
+              Your database is clean. Get started by registering your first workspace project to start recording work memory.
+            </p>
+          </div>
+          <NavLink
+            to="/workspaces"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium text-xs shadow-lg shadow-violet-600/20 transition-all"
+          >
+            <PlusCircle className="w-4 h-4" />
+            <span>Create Your First Workspace</span>
+          </NavLink>
         </div>
       ) : (
         <div className="bg-[#121826] border border-[#1a2233] rounded-xl p-12 text-center space-y-2">

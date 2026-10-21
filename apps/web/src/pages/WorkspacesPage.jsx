@@ -80,8 +80,26 @@ export default function WorkspacesPage() {
         </button>
       </div>
 
-      {/* Workspace Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* Workspace Cards Grid or Empty State */}
+      {workspaces.length === 0 ? (
+        <div className="rounded-xl bg-ghost-card border border-ghost-border p-12 text-center space-y-4">
+          <FolderGit2 className="w-12 h-12 text-violet-400/60 mx-auto" />
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold text-white">No Workspaces Registered Yet</h3>
+            <p className="text-xs text-slate-400 max-w-md mx-auto">
+              Workspaces represent your projects or code repositories. Register your first project below to start capturing work sessions.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium text-xs shadow-lg shadow-violet-600/20 transition-all"
+          >
+            <PlusCircle className="w-4 h-4" />
+            <span>Register Your First Workspace</span>
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {workspaces.map((ws) => {
           const isActive = activeWorkspace?.id === ws.id;
           const sessionCount = ws._count?.sessions || 0;
@@ -160,6 +178,7 @@ export default function WorkspacesPage() {
           );
         })}
       </div>
+      )}
 
       {/* Modal: Register Workspace */}
       {showModal && (

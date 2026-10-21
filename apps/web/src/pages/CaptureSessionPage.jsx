@@ -203,7 +203,7 @@ export default function CaptureSessionPage() {
             className="min-w-[260px] max-w-[480px] px-3 py-2 rounded-lg bg-ghost-surface border border-ghost-border text-sm text-slate-200 font-medium focus:outline-none focus:border-violet-500 disabled:opacity-50 disabled:cursor-not-allowed appearance-auto"
           >
             {workspaces.length === 0 && (
-              <option value="" disabled>Loading workspaces…</option>
+              <option value="" disabled>No workspaces registered yet</option>
             )}
             {workspaces.map((w) => (
               <option key={w.id} value={w.id}>
@@ -216,13 +216,10 @@ export default function CaptureSessionPage() {
         <div className="flex items-center gap-2 self-start sm:self-auto">
           {workspaces.length === 0 && (
             <button
-              onClick={() => {
-                refreshWorkspaces();
-                refreshSystemStatus();
-              }}
-              className="px-2.5 py-1 rounded bg-violet-600/30 hover:bg-violet-600/50 text-violet-300 text-xs border border-violet-500/40 transition-colors font-medium"
+              onClick={() => navigate('/workspaces')}
+              className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold shadow-md shadow-violet-600/30 transition-all flex items-center gap-1.5"
             >
-              Retry
+              <span>+ Create Workspace</span>
             </button>
           )}
           <button
